@@ -31,9 +31,22 @@
 
 typedef struct
 {
-  gint           n;
+  ClutterColor color;
 
-  ClutterActor **p;
+  gdouble      angle;
+  gdouble      size;
+}
+atom;
+
+
+
+typedef struct
+{
+  ClutterActor **actor;
+  atom          *state;
+
+  gint           start;
+  gint           length;
 }
 tail;
 
