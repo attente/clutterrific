@@ -45,6 +45,8 @@
 
 #include <clutter/clutter.h>
 
+#include "clutterrific.h"
+
 
 
 static const gchar *file[] =
@@ -563,6 +565,8 @@ main (int   argc,
   ClutterTimeline *timeline_turn;
 
   clutter_init (&argc, &argv);
+
+  clutterrific_init ();
 
   cogl_set_depth_test_enabled (TRUE);
 

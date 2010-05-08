@@ -5,8 +5,8 @@ LIBS   = $(shell pkg-config --libs clutter-1.0)
 
 all: cube
 
-cube: cube.o
-	gcc $(LIBS) -o cube cube.o
+cube: cube.o clutterrific.o
+	gcc $(LIBS) -o cube cube.o clutterrific.o
 
 clean:
-	-rm cube cube.o
+	-rm cube *.o
