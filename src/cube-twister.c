@@ -20,10 +20,6 @@
 
 
 
-/* window size */
-#define WIDTH      800
-#define HEIGHT     600
-
 /* cube upscale */
 #define SCALE        3
 
@@ -51,12 +47,12 @@
 
 static const gchar *file[] =
 {
-  "data/0.png",
-  "data/1.png",
-  "data/2.png",
-  "data/3.png",
-  "data/4.png",
-  "data/5.png"
+  "/usr/lib/gnome-screensaver/gnome-screensaver/data/0.png",
+  "/usr/lib/gnome-screensaver/gnome-screensaver/data/1.png",
+  "/usr/lib/gnome-screensaver/gnome-screensaver/data/2.png",
+  "/usr/lib/gnome-screensaver/gnome-screensaver/data/3.png",
+  "/usr/lib/gnome-screensaver/gnome-screensaver/data/4.png",
+  "/usr/lib/gnome-screensaver/gnome-screensaver/data/5.png"
 };
 
 
@@ -555,8 +551,8 @@ int
 main (int   argc,
       char *argv[])
 {
-  gint             width  = WIDTH;
-  gint             height = HEIGHT;
+  gfloat           width;
+  gfloat           height;
   gfloat           period = PERIOD;
 
   ClutterActor    *stage;
@@ -564,9 +560,8 @@ main (int   argc,
   ClutterTimeline *timeline_spin;
   ClutterTimeline *timeline_turn;
 
-  clutter_init (&argc, &argv);
-
-  clutterrific_init ();
+  clutter_init      (&argc, &argv);
+  clutterrific_init (&argc, &argv);
 
   cogl_set_depth_test_enabled (TRUE);
 
@@ -576,7 +571,8 @@ main (int   argc,
     stage = clutter_stage_get_default ();
 
     clutter_stage_set_color (CLUTTER_STAGE (stage), &bg);
-    clutter_actor_set_size  (stage, width, height);
+    clutter_actor_show_all  (stage);
+    clutter_actor_get_size  (stage, &width, &height);
   }
 
   /* create animation score */
@@ -621,7 +617,7 @@ main (int   argc,
     gint scale = SCALE;
     gint size  = scale * (90 + 4 * SPACE);
 
-    clutter_actor_set_position  (cube, width - size >> 1, height - size >> 1);
+    clutter_actor_set_position  (cube, (width - size) / 2, (height - size) / 2);
     clutter_actor_set_depth     (cube, -size);
     clutter_actor_set_scale     (cube, scale, scale);
     clutter_container_add_actor (CLUTTER_CONTAINER (stage), cube);
