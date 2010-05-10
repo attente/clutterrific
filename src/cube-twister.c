@@ -614,7 +614,7 @@ main (int   argc,
   }
 
   {
-    gint scale = SCALE;
+    gint scale = SCALE * height / 480;
     gint size  = scale * (90 + 4 * SPACE);
 
     clutter_actor_set_position  (cube, (width - size) / 2, (height - size) / 2);
