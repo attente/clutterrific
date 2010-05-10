@@ -1,6 +1,6 @@
 .PHONY: all install uninstall clean
 
-CFLAGS = -ansi -pedantic $(shell pkg-config --cflags clutter-1.0)
+CFLAGS = -ansi -pedantic -Wall $(shell pkg-config --cflags clutter-1.0)
 LIBS   = $(shell pkg-config --libs clutter-1.0)
 
 all: cube-twister

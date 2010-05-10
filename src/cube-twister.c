@@ -502,11 +502,11 @@ turn (ClutterTimeline *timeline,
       gint             frame,
       gpointer         data)
 {
-  static gdouble previous = 2;
+  static gfloat previous = 2;
 
-  gdouble progress = clutter_timeline_get_progress (timeline);
-  gdouble measure;
-  gdouble angle;
+  gfloat progress = clutter_timeline_get_progress (timeline);
+  gfloat measure;
+  gfloat angle;
 
   if (progress < previous)
   {
