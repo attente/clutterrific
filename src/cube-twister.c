@@ -244,7 +244,9 @@ shuffle (void)
     }
   }
 
-  moves = POST_WAIT + g_random_int_range (MIN_TURNS, MAX_TURNS + 1) + PRE_WAIT;
+  moves = POST_WAIT
+        + g_random_int_range (MIN_TURNS, MAX_TURNS + 1)
+        + PRE_WAIT;
 
   if (moves < POST_WAIT + 1 + PRE_WAIT)
     moves = POST_WAIT + 1 + PRE_WAIT;
@@ -322,7 +324,10 @@ rotate (gint              index,
         ClutterRotateAxis axis,
         gfloat            angle)
 {
-  clutter_actor_set_rotation (tile[index][level], axis, angle, 45 - SPACE * (index % 3 - 1), 45 - SPACE * (index / 3 % 3 - 1), -45 - 2 * SPACE);
+  clutter_actor_set_rotation (tile[index][level], axis, angle,
+                              45 - SPACE * (index % 3 - 1),
+                              45 - SPACE * (index / 3 % 3 - 1),
+                              -45 - 2 * SPACE);
 }
 
 
@@ -361,7 +366,9 @@ layout (gint   face,
     rotate (l[5], 0, CLUTTER_Z_AXIS,   0);
 
     for (k = 0; k < 6; k++)
-      rotate (l[k], 2, CLUTTER_Z_AXIS, get_delta (l[k], 3 * i + j, pivot[k]));
+      rotate (l[k], 2,
+              CLUTTER_Z_AXIS,
+              get_delta (l[k], 3 * i + j, pivot[k]));
   }
 
   for (i = 0; i < 54; i++)
@@ -374,7 +381,9 @@ layout (gint   face,
   if (face >= 0)
   {
     for (i = 0; i < 9; i++)
-      rotate (index[9 * face + i], 1, CLUTTER_Z_AXIS, face < 3 ? -angle : angle);
+      rotate (index[9 * face + i], 1,
+              CLUTTER_Z_AXIS,
+              face < 3 ? -angle : angle);
   }
 
   switch (face)
@@ -490,9 +499,15 @@ spin (ClutterTimeline *timeline,
 
   angle += 0.1;
 
-  clutter_actor_set_rotation (cube, CLUTTER_X_AXIS, 3 * angle + 30, size, size, size);
-  clutter_actor_set_rotation (cube, CLUTTER_Y_AXIS, 2 * angle + 60, size, size, size);
-  clutter_actor_set_rotation (cube, CLUTTER_Z_AXIS, 1 * angle + 90, size, size, size);
+  clutter_actor_set_rotation (cube, CLUTTER_X_AXIS,
+                              3 * angle + 30,
+                              size, size, size);
+  clutter_actor_set_rotation (cube, CLUTTER_Y_AXIS,
+                              2 * angle + 60,
+                              size, size, size);
+  clutter_actor_set_rotation (cube, CLUTTER_Z_AXIS,
+                              1 * angle + 90,
+                              size, size, size);
 }
 
 
@@ -603,12 +618,15 @@ main (int   argc,
       tile[l][0] = clutter_group_new ();
       tile[l][1] = clutter_group_new ();
       tile[l][2] = clutter_texture_new_from_file (file[i], NULL);
-      clutter_actor_set_position  (tile[l][0], (k + 1) * SPACE, (j + 1) * SPACE);
+      clutter_actor_set_position  (tile[l][0], (k + 1) * SPACE,
+                                               (j + 1) * SPACE);
       clutter_actor_set_depth     (tile[l][0], 90 + 4 * SPACE);
       clutter_actor_set_size      (tile[l][2], 90, 90);
       clutter_actor_set_clip      (tile[l][2], k * 30, j * 30, 30, 30);
-      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][1]), tile[l][2]);
-      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][0]), tile[l][1]);
+      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][1]),
+                                                      tile[l][2]);
+      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][0]),
+                                                      tile[l][1]);
       clutter_container_add_actor (CLUTTER_CONTAINER (cube), tile[l][0]);
     }
   }
@@ -617,7 +635,8 @@ main (int   argc,
     gint scale = SCALE * height / 480;
     gint size  = scale * (90 + 4 * SPACE);
 
-    clutter_actor_set_position  (cube, (width - size) / 2, (height - size) / 2);
+    clutter_actor_set_position  (cube, (width  - size) / 2,
+                                       (height - size) / 2);
     clutter_actor_set_depth     (cube, -size);
     clutter_actor_set_scale     (cube, scale, scale);
     clutter_container_add_actor (CLUTTER_CONTAINER (stage), cube);
