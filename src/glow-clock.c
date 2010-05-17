@@ -20,22 +20,20 @@
 
 
 
-#define A      4
+#define A       4
 
-#define ROWS  60
-#define COLS  80
+#define ROWS   60
+#define COLS   80
 
-#define SPACE  4
+#define SPACE   4
 
-#define GRID  15
+#define GRID   15
+
+#define HOUR    0.70
+#define MINUTE  0.85
+#define SECOND  0.95
 
 #define TRIM
-
-#ifdef TRIM
-  #define OPTIONAL(x)
-#else
-  #define OPTIONAL(x) x
-#endif
 
 
 
@@ -45,6 +43,12 @@
 #include <clutter/clutter.h>
 
 #include "clutterrific.h"
+
+
+
+#ifndef M_PI
+  #define M_PI 3.141592653589793238
+#endif
 
 
 
@@ -283,10 +287,12 @@ paint_char (gint     x,
       pixel[pack (y + 9, x + 4)].x = 0;
       pixel[pack (y + 9, x + 5)].x = 0;
 
-      OPTIONAL (pixel[pack (y + 0, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 0, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 9, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 9, x + 6)].x = 0);
+#ifndef TRIM
+      pixel[pack (y + 0, x + 1)].x = 0;
+      pixel[pack (y + 0, x + 6)].x = 0;
+      pixel[pack (y + 9, x + 1)].x = 0;
+      pixel[pack (y + 9, x + 6)].x = 0;
+#endif
 
       break;
 
@@ -357,9 +363,11 @@ paint_char (gint     x,
       pixel[pack (y + 9, x + 5)].x = 0;
       pixel[pack (y + 9, x + 6)].x = 0;
 
-      OPTIONAL (pixel[pack (y + 0, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 4, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 5, x + 6)].x = 0);
+#ifndef TRIM
+      pixel[pack (y + 0, x + 6)].x = 0;
+      pixel[pack (y + 4, x + 1)].x = 0;
+      pixel[pack (y + 5, x + 6)].x = 0;
+#endif
 
       break;
 
@@ -401,10 +409,12 @@ paint_char (gint     x,
       pixel[pack (y + 9, x + 4)].x = 0;
       pixel[pack (y + 9, x + 5)].x = 0;
 
-      OPTIONAL (pixel[pack (y + 0, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 4, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 5, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 9, x + 6)].x = 0);
+#ifndef TRIM
+      pixel[pack (y + 0, x + 6)].x = 0;
+      pixel[pack (y + 4, x + 6)].x = 0;
+      pixel[pack (y + 5, x + 6)].x = 0;
+      pixel[pack (y + 9, x + 6)].x = 0;
+#endif
 
       break;
 
@@ -445,7 +455,9 @@ paint_char (gint     x,
       pixel[pack (y + 9, x + 5)].x = 0;
       pixel[pack (y + 9, x + 6)].x = 0;
 
-      OPTIONAL (pixel[pack (y + 5, x + 1)].x = 0);
+#ifndef TRIM
+      pixel[pack (y + 5, x + 1)].x = 0;
+#endif
 
       break;
 
@@ -493,8 +505,10 @@ paint_char (gint     x,
       pixel[pack (y + 9, x + 4)].x = 0;
       pixel[pack (y + 9, x + 5)].x = 0;
 
-      OPTIONAL (pixel[pack (y + 4, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 9, x + 6)].x = 0);
+#ifndef TRIM
+      pixel[pack (y + 4, x + 6)].x = 0;
+      pixel[pack (y + 9, x + 6)].x = 0;
+#endif
 
       break;
 
@@ -544,10 +558,12 @@ paint_char (gint     x,
       pixel[pack (y + 9, x + 4)].x = 0;
       pixel[pack (y + 9, x + 5)].x = 0;
 
-      OPTIONAL (pixel[pack (y + 0, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 4, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 9, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 9, x + 6)].x = 0);
+#ifndef TRIM
+      pixel[pack (y + 0, x + 1)].x = 0;
+      pixel[pack (y + 4, x + 6)].x = 0;
+      pixel[pack (y + 9, x + 1)].x = 0;
+      pixel[pack (y + 9, x + 6)].x = 0;
+#endif
 
       break;
 
@@ -629,14 +645,16 @@ paint_char (gint     x,
       pixel[pack (y + 9, x + 4)].x = 0;
       pixel[pack (y + 9, x + 5)].x = 0;
 
-      OPTIONAL (pixel[pack (y + 0, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 0, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 4, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 4, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 5, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 5, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 9, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 9, x + 6)].x = 0);
+#ifndef TRIM
+      pixel[pack (y + 0, x + 1)].x = 0;
+      pixel[pack (y + 0, x + 6)].x = 0;
+      pixel[pack (y + 4, x + 1)].x = 0;
+      pixel[pack (y + 4, x + 6)].x = 0;
+      pixel[pack (y + 5, x + 1)].x = 0;
+      pixel[pack (y + 5, x + 6)].x = 0;
+      pixel[pack (y + 9, x + 1)].x = 0;
+      pixel[pack (y + 9, x + 6)].x = 0;
+#endif
 
       break;
 
@@ -679,9 +697,11 @@ paint_char (gint     x,
       pixel[pack (y + 9, x + 5)].x = 0;
       pixel[pack (y + 9, x + 6)].x = 0;
 
-      OPTIONAL (pixel[pack (y + 0, x + 1)].x = 0);
-      OPTIONAL (pixel[pack (y + 0, x + 6)].x = 0);
-      OPTIONAL (pixel[pack (y + 5, x + 1)].x = 0);
+#ifndef TRIM
+      pixel[pack (y + 0, x + 1)].x = 0;
+      pixel[pack (y + 0, x + 6)].x = 0;
+      pixel[pack (y + 5, x + 1)].x = 0;
+#endif
 
       break;
   }
@@ -717,14 +737,25 @@ paint_back (void)
 static void
 paint_front (void)
 {
-  gint  len = 0;
-  gchar text[16];
+  gint   len = 0;
+  gchar  text[16];
 
   {
+    gfloat     r     = (rows - get_height (0) - 3 * SPACE) / 2.0;
+    gfloat     x     = cols >> 1;
+    gfloat     y     = (gint) (SPACE + r + 0.5);
+
     time_t     now   = time (NULL);
     struct tm *local = localtime (&now);
 
     strftime (text, sizeof (text) / sizeof (text[0]), "%H:%M:%S", local);
+
+    paint_line (x, y, x + SECOND * r * sin (M_PI * local->tm_sec  / 30),
+                      y - SECOND * r * cos (M_PI * local->tm_sec  / 30));
+    paint_line (x, y, x + MINUTE * r * sin (M_PI * local->tm_min  / 30),
+                      y - MINUTE * r * cos (M_PI * local->tm_min  / 30));
+    paint_line (x, y, x + HOUR   * r * sin (M_PI * local->tm_hour / 6),
+                      y - HOUR   * r * cos (M_PI * local->tm_hour / 6));
   }
 
   {
