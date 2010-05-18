@@ -22,7 +22,7 @@
 
 #define TRIM
 
-#define A         4
+#define A        10
 
 #define ROWS     60
 #define COLS     80
@@ -177,7 +177,7 @@ paint_pixel (gfloat x,
   ClutterColor c = { 0, 0, 0, 128 };
   CoglHandle   m = cogl_material_new ();
 
-  clutter_color_from_hls     (&c, h, 0.8 * l, 1);
+  clutter_color_from_hls     (&c, h, 0.75 * l, 1);
   cogl_material_set_color4ub (m, c.red, c.green, c.blue, c.alpha);
   cogl_material_set_layer    (m, 0, glow_texture);
 
@@ -827,16 +827,18 @@ paint_front (void)
     gfloat x = cols >> 1;
     gfloat y = (gint) (SPACE + r + 0.5);
 
+    time_t     t;
+    struct tm *p;
     GTimeVal now;
     gfloat h, m, s;
 
+    t = time (NULL);
+    p = localtime (&t);
     g_get_current_time (&now);
 
-    g_printf ("%ld\n", now.tv_sec);
-
     s = now.tv_sec % 60 + now.tv_usec * 1E-6;
-    m = now.tv_sec / 60 % 60 + s / 60;
-    h = now.tv_sec / 60 / 60 % 24 + m / 60;
+    m = p->tm_min  + s / 60;
+    h = p->tm_hour + m / 60;
 
     paint_line (x, y, x + HOUR   * r * sin (M_PI * h / 6),
                       y - HOUR   * r * cos (M_PI * h / 6));
