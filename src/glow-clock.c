@@ -29,9 +29,9 @@
 
 #define GRID   15
 
-#define HOUR    0.70
-#define MINUTE  0.85
-#define SECOND  0.95
+#define HOUR    0.60
+#define MINUTE  0.80
+#define SECOND  0.90
 
 #define TRIM
 
@@ -76,8 +76,17 @@ static light  *pixel;
 
 
 
+static gint     sign         (gint      x);
+
 static gint     pack         (gint      i,
                               gint      j);
+
+static gfloat   norm         (gfloat    x0,
+                              gfloat    y0,
+                              gfloat    x1,
+                              gfloat    y1,
+                              gfloat    x,
+                              gfloat    y);
 
 static void     update_light (light    *l,
                               gdouble   dt);
@@ -97,10 +106,10 @@ static void     paint_char   (gint      x,
                               gint      y,
                               gunichar  c);
 
-static void     paint_line   (gfloat    x1,
-                              gfloat    y1,
-                              gfloat    x2,
-                              gfloat    y2);
+static void     paint_line   (gfloat    x0,
+                              gfloat    y0,
+                              gfloat    x1,
+                              gfloat    y1);
 
 static void     paint_back   (void);
 
@@ -113,10 +122,31 @@ static gboolean queue        (gpointer  data);
 
 
 static gint
+sign (gint x)
+{
+  return x < 0 ? -1 : !!x;
+}
+
+
+
+static gint
 pack (gint i,
       gint j)
 {
   return i * cols + j;
+}
+
+
+
+static gfloat
+norm (gfloat x0,
+      gfloat y0,
+      gfloat x1,
+      gfloat y1,
+      gfloat x,
+      gfloat y)
+{
+  return ABS ((y0 - y1) * (x - x0) + (x1 - x0) * (y - y0));
 }
 
 
@@ -710,11 +740,34 @@ paint_char (gint     x,
 
 
 static void
-paint_line (gfloat x1,
-            gfloat y1,
-            gfloat x2,
-            gfloat y2)
+paint_line (gfloat x0,
+            gfloat y0,
+            gfloat x1,
+            gfloat y1)
 {
+  gint x2 = (gint) (x0 + 0.5);
+  gint y2 = (gint) (y0 + 0.5);
+  gint x3 = (gint) (x1 + 0.5);
+  gint y3 = (gint) (y1 + 0.5);
+  gint dx = sign (x3 - x2);
+  gint dy = sign (y3 - y2);
+  gint x  = x2;
+  gint y  = y2;
+
+  pixel[pack (y, x)].x = 0;
+
+  while (x != x3 || y != y3)
+  {
+    gfloat d1 = norm (x0, y0, x1, y1, x + dx, y +  0);
+    gfloat d2 = norm (x0, y0, x1, y1, x +  0, y + dy);
+
+    if (!dy || d1 <= d2)
+      x += dx;
+    if (!dx || d1 >= d2)
+      y += dy;
+
+    pixel[pack (y, x)].x = 0;
+  }
 }
 
 
@@ -737,25 +790,47 @@ paint_back (void)
 static void
 paint_front (void)
 {
-  gint   len = 0;
-  gchar  text[16];
+  gint  len = 0;
+  gchar text[16];
 
   {
-    gfloat     r     = (rows - get_height (0) - 3 * SPACE) / 2.0;
-    gfloat     x     = cols >> 1;
-    gfloat     y     = (gint) (SPACE + r + 0.5);
+    gfloat r = (rows - get_height (0) - 3 * SPACE) / 2.0;
+    gfloat x = cols >> 1;
+    gfloat y = (gint) (SPACE + r + 0.5);
 
+    GTimeVal now;
+    gfloat h, m, s;
+
+    g_get_current_time (&now);
+
+    s = now.tv_sec % 60 + now.tv_usec * 1E-6;
+    m = now.tv_sec / 60 % 60 + s / 60;
+    h = now.tv_sec / 60 / 60 % 24 + m / 60;
+
+    paint_line (x, y, x + HOUR   * r * sin (M_PI * h / 6),
+                      y - HOUR   * r * cos (M_PI * h / 6));
+    paint_line (x, y, x + MINUTE * r * sin (M_PI * m / 30),
+                      y - MINUTE * r * cos (M_PI * m / 30));
+    paint_line (x, y, x + SECOND * r * sin (M_PI * s / 30),
+                      y - SECOND * r * cos (M_PI * s / 30));
+
+    {
+      gint i;
+
+      for (i = 0; i < 12; i++)
+        paint_line (x + (r - !(i % 3)) * sin (M_PI * i / 6),
+                    y - (r - !(i % 3)) * cos (M_PI * i / 6),
+                    x + r * sin (M_PI * i / 6),
+                    y - r * cos (M_PI * i / 6));
+
+    }
+  }
+
+  {
     time_t     now   = time (NULL);
     struct tm *local = localtime (&now);
 
     strftime (text, sizeof (text) / sizeof (text[0]), "%H:%M:%S", local);
-
-    paint_line (x, y, x + SECOND * r * sin (M_PI * local->tm_sec  / 30),
-                      y - SECOND * r * cos (M_PI * local->tm_sec  / 30));
-    paint_line (x, y, x + MINUTE * r * sin (M_PI * local->tm_min  / 30),
-                      y - MINUTE * r * cos (M_PI * local->tm_min  / 30));
-    paint_line (x, y, x + HOUR   * r * sin (M_PI * local->tm_hour / 6),
-                      y - HOUR   * r * cos (M_PI * local->tm_hour / 6));
   }
 
   {
