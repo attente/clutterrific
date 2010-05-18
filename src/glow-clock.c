@@ -20,20 +20,25 @@
 
 
 
-#define A       4
-
-#define ROWS   60
-#define COLS   80
-
-#define SPACE   4
-
-#define GRID   15
-
-#define HOUR    0.60
-#define MINUTE  0.80
-#define SECOND  0.90
-
 #define TRIM
+
+#define A         4
+
+#define ROWS     60
+#define COLS     80
+
+#define SPACE     4
+
+#define GRID     15
+
+#define HOUR      0.6
+#define MINUTE    0.8
+#define SECOND    0.9
+
+#define TEXTURE   8
+
+#define EMIT_IN   0.3
+#define EMIT_OUT  0.5
 
 
 
@@ -64,15 +69,18 @@ light;
 
 
 
-static gfloat  width;
-static gfloat  height;
+static gfloat      width;
+static gfloat      height;
 
-static gint    rows;
-static gint    cols;
+static gint        rows;
+static gint        cols;
 
-static gfloat  grid;
+static gfloat      grid;
 
-static light  *pixel;
+static light      *pixel;
+
+static CoglHandle  emit_texture;
+static CoglHandle  glow_texture;
 
 
 
@@ -166,16 +174,37 @@ paint_pixel (gfloat x,
              gfloat h,
              gfloat l)
 {
-  ClutterColor c = { 0, 0, 0, 255 };
+  ClutterColor c = { 0, 0, 0, 128 };
+  CoglHandle   m = cogl_material_new ();
 
-  clutter_color_from_hls (&c, h, l, 1);
+  clutter_color_from_hls     (&c, h, 0.8 * l, 1);
+  cogl_material_set_color4ub (m, c.red, c.green, c.blue, c.alpha);
+  cogl_material_set_layer    (m, 0, glow_texture);
 
-  cogl_set_source_color4ub (c.red, c.green, c.blue, c.alpha);
+  cogl_set_source (m);
 
-  cogl_rectangle (x + (width  - grid + 2) / 2.0,
-                  y + (height - grid + 2) / 2.0,
-                  x + (width  + grid - 2) / 2.0,
-                  y + (height + grid - 2) / 2.0);
+  cogl_rectangle (x + (width  - 2.0 * grid) / 2.0,
+                  y + (height - 2.0 * grid) / 2.0,
+                  x + (width  + 2.0 * grid) / 2.0,
+                  y + (height + 2.0 * grid) / 2.0);
+
+  cogl_handle_unref (m);
+
+  m = cogl_material_new ();
+
+  clutter_color_from_hls     (&c, h, CLAMP (l * 2, 0, 1), 1);
+  cogl_material_set_color4ub (m, c.red, c.green, c.blue, c.alpha);
+  cogl_material_set_layer    (m, 0, emit_texture);
+
+  cogl_set_source (m);
+
+  cogl_rectangle_with_texture_coords (x + (width  - 1.0 * grid) / 2.0,
+                                      y + (height - 1.0 * grid) / 2.0,
+                                      x + (width  + 1.0 * grid) / 2.0,
+                                      y + (height + 1.0 * grid) / 2.0,
+                                      0, 0, 1, 1);
+
+  cogl_handle_unref (m);
 }
 
 
@@ -781,7 +810,7 @@ paint_back (void)
   for (j = 0; j < cols; j++)
   {
     pixel[pack (i, j)].hue = 3 * (i + j) % 360;
-    pixel[pack (i, j)].x   = 0.6;
+    pixel[pack (i, j)].x   = 1;
   }
 }
 
@@ -802,6 +831,8 @@ paint_front (void)
     gfloat h, m, s;
 
     g_get_current_time (&now);
+
+    g_printf ("%ld\n", now.tv_sec);
 
     s = now.tv_sec % 60 + now.tv_usec * 1E-6;
     m = now.tv_sec / 60 % 60 + s / 60;
@@ -928,11 +959,75 @@ main (int   argc,
 
   pixel = g_new0 (light, rows * cols);
 
+  {
+    guint8 emit_data[4 * TEXTURE * TEXTURE];
+    guint8 glow_data[4 * TEXTURE * TEXTURE];
+    gint   i, j;
+
+    for (i = 0; i < TEXTURE * TEXTURE; i++)
+    {
+      emit_data[4 * i + 0] = 255;
+      emit_data[4 * i + 1] = 255;
+      emit_data[4 * i + 2] = 255;
+      emit_data[4 * i + 3] = 0;
+
+      glow_data[4 * i + 0] = 255;
+      glow_data[4 * i + 1] = 255;
+      glow_data[4 * i + 2] = 255;
+      glow_data[4 * i + 3] = 0;
+    }
+
+    for (i = 0; i < TEXTURE; i++)
+    for (j = 0; j < TEXTURE; j++)
+    {
+      gint   k = i * TEXTURE + j;
+      gfloat c = (TEXTURE - 1) / 2.0;
+      gfloat x = j - c;
+      gfloat y = i - c;
+
+      if (!(TEXTURE & 1))
+      {
+        x += x < 0 ? 0.5 : -0.5;
+        y += y < 0 ? 0.5 : -0.5;
+      }
+
+      x /= (TEXTURE - 1) / 2;
+      y /= (TEXTURE - 1) / 2;
+
+      {
+        gfloat two = sqrt (x * x + y * y);
+        gfloat inf = MAX (ABS (x), ABS (y));
+
+        if (inf < EMIT_IN)
+          emit_data[4 * k + 3] = 255;
+        else if (inf < EMIT_OUT)
+          emit_data[4 * k + 3] =  32;
+
+        if (two < 1)
+          glow_data[4 * k + 3] = 128 * (1 - two) * (1 - two);
+      }
+    }
+
+    emit_texture = cogl_texture_new_from_data (TEXTURE, TEXTURE,
+                                               COGL_TEXTURE_NONE,
+                                               COGL_PIXEL_FORMAT_RGBA_8888,
+                                               COGL_PIXEL_FORMAT_ANY,
+                                               4 * TEXTURE, emit_data);
+    glow_texture = cogl_texture_new_from_data (TEXTURE, TEXTURE,
+                                               COGL_TEXTURE_NONE,
+                                               COGL_PIXEL_FORMAT_RGBA_8888,
+                                               COGL_PIXEL_FORMAT_ANY,
+                                               4 * TEXTURE, glow_data);
+  }
+
   g_signal_connect_after (stage, "paint", paint, NULL);
 
   g_timeout_add (10, queue, NULL);
 
   clutter_main ();
+
+  cogl_handle_unref (glow_texture);
+  cogl_handle_unref (emit_texture);
 
   g_free (pixel);
 
