@@ -31,14 +31,15 @@
 
 #define GRID     15
 
-#define HOUR      0.6
-#define MINUTE    0.8
-#define SECOND    0.9
+#define HOUR      0.60
+#define MINUTE    0.80
+#define SECOND    0.90
 
 #define TEXTURE   8
 
-#define EMIT_IN   0.3
-#define EMIT_OUT  0.5
+#define EMIT_OFF  0.05
+#define EMIT_IN   0.30
+#define EMIT_OUT  0.50
 
 
 
@@ -289,477 +290,477 @@ paint_char (gint     x,
   switch (c)
   {
     case ':':
-      pixel[pack (y + 2, x + 1)].x = 0;
-      pixel[pack (y + 2, x + 2)].x = 0;
-      pixel[pack (y + 3, x + 1)].x = 0;
-      pixel[pack (y + 3, x + 2)].x = 0;
-      pixel[pack (y + 6, x + 1)].x = 0;
-      pixel[pack (y + 6, x + 2)].x = 0;
-      pixel[pack (y + 7, x + 1)].x = 0;
-      pixel[pack (y + 7, x + 2)].x = 0;
+      pixel[pack (y + 2, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 2)].x = EMIT_OFF;
 
       break;
 
     case '0':
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 3)].x = 0;
-      pixel[pack (y + 0, x + 4)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 3)].x = 0;
-      pixel[pack (y + 1, x + 4)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 1)].x = 0;
-      pixel[pack (y + 2, x + 2)].x = 0;
-      pixel[pack (y + 2, x + 5)].x = 0;
-      pixel[pack (y + 2, x + 6)].x = 0;
-      pixel[pack (y + 3, x + 1)].x = 0;
-      pixel[pack (y + 3, x + 2)].x = 0;
-      pixel[pack (y + 3, x + 5)].x = 0;
-      pixel[pack (y + 3, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 1)].x = 0;
-      pixel[pack (y + 4, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 5, x + 1)].x = 0;
-      pixel[pack (y + 5, x + 2)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
-      pixel[pack (y + 6, x + 1)].x = 0;
-      pixel[pack (y + 6, x + 2)].x = 0;
-      pixel[pack (y + 6, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 6)].x = 0;
-      pixel[pack (y + 7, x + 1)].x = 0;
-      pixel[pack (y + 7, x + 2)].x = 0;
-      pixel[pack (y + 7, x + 5)].x = 0;
-      pixel[pack (y + 7, x + 6)].x = 0;
-      pixel[pack (y + 8, x + 1)].x = 0;
-      pixel[pack (y + 8, x + 2)].x = 0;
-      pixel[pack (y + 8, x + 3)].x = 0;
-      pixel[pack (y + 8, x + 4)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 2)].x = 0;
-      pixel[pack (y + 9, x + 3)].x = 0;
-      pixel[pack (y + 9, x + 4)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
 
 #ifndef TRIM
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 1)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 #endif
 
       break;
 
     case '1':
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 2, x + 1)].x = 0;
-      pixel[pack (y + 2, x + 2)].x = 0;
-      pixel[pack (y + 3, x + 1)].x = 0;
-      pixel[pack (y + 3, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 1)].x = 0;
-      pixel[pack (y + 4, x + 2)].x = 0;
-      pixel[pack (y + 5, x + 1)].x = 0;
-      pixel[pack (y + 5, x + 2)].x = 0;
-      pixel[pack (y + 6, x + 1)].x = 0;
-      pixel[pack (y + 6, x + 2)].x = 0;
-      pixel[pack (y + 7, x + 1)].x = 0;
-      pixel[pack (y + 7, x + 2)].x = 0;
-      pixel[pack (y + 8, x + 1)].x = 0;
-      pixel[pack (y + 8, x + 2)].x = 0;
-      pixel[pack (y + 9, x + 1)].x = 0;
-      pixel[pack (y + 9, x + 2)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 2)].x = EMIT_OFF;
 
       break;
 
     case '2':
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 3)].x = 0;
-      pixel[pack (y + 0, x + 4)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 3)].x = 0;
-      pixel[pack (y + 1, x + 4)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 5)].x = 0;
-      pixel[pack (y + 2, x + 6)].x = 0;
-      pixel[pack (y + 3, x + 5)].x = 0;
-      pixel[pack (y + 3, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 3)].x = 0;
-      pixel[pack (y + 4, x + 4)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 5, x + 1)].x = 0;
-      pixel[pack (y + 5, x + 2)].x = 0;
-      pixel[pack (y + 5, x + 3)].x = 0;
-      pixel[pack (y + 5, x + 4)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 1)].x = 0;
-      pixel[pack (y + 6, x + 2)].x = 0;
-      pixel[pack (y + 7, x + 1)].x = 0;
-      pixel[pack (y + 7, x + 2)].x = 0;
-      pixel[pack (y + 8, x + 1)].x = 0;
-      pixel[pack (y + 8, x + 2)].x = 0;
-      pixel[pack (y + 8, x + 3)].x = 0;
-      pixel[pack (y + 8, x + 4)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 1)].x = 0;
-      pixel[pack (y + 9, x + 2)].x = 0;
-      pixel[pack (y + 9, x + 3)].x = 0;
-      pixel[pack (y + 9, x + 4)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 
 #ifndef TRIM
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 1)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
 #endif
 
       break;
 
     case '3':
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 3)].x = 0;
-      pixel[pack (y + 0, x + 4)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 3)].x = 0;
-      pixel[pack (y + 1, x + 4)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 5)].x = 0;
-      pixel[pack (y + 2, x + 6)].x = 0;
-      pixel[pack (y + 3, x + 5)].x = 0;
-      pixel[pack (y + 3, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 3)].x = 0;
-      pixel[pack (y + 4, x + 4)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 3)].x = 0;
-      pixel[pack (y + 5, x + 4)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 6)].x = 0;
-      pixel[pack (y + 7, x + 5)].x = 0;
-      pixel[pack (y + 7, x + 6)].x = 0;
-      pixel[pack (y + 8, x + 1)].x = 0;
-      pixel[pack (y + 8, x + 2)].x = 0;
-      pixel[pack (y + 8, x + 3)].x = 0;
-      pixel[pack (y + 8, x + 4)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 1)].x = 0;
-      pixel[pack (y + 9, x + 2)].x = 0;
-      pixel[pack (y + 9, x + 3)].x = 0;
-      pixel[pack (y + 9, x + 4)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
 
 #ifndef TRIM
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 #endif
 
       break;
 
     case '4':
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 1)].x = 0;
-      pixel[pack (y + 2, x + 2)].x = 0;
-      pixel[pack (y + 2, x + 5)].x = 0;
-      pixel[pack (y + 2, x + 6)].x = 0;
-      pixel[pack (y + 3, x + 1)].x = 0;
-      pixel[pack (y + 3, x + 2)].x = 0;
-      pixel[pack (y + 3, x + 5)].x = 0;
-      pixel[pack (y + 3, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 1)].x = 0;
-      pixel[pack (y + 4, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 3)].x = 0;
-      pixel[pack (y + 4, x + 4)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 5, x + 2)].x = 0;
-      pixel[pack (y + 5, x + 3)].x = 0;
-      pixel[pack (y + 5, x + 4)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
-      pixel[pack (y + 6, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 6)].x = 0;
-      pixel[pack (y + 7, x + 5)].x = 0;
-      pixel[pack (y + 7, x + 6)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 
 #ifndef TRIM
-      pixel[pack (y + 5, x + 1)].x = 0;
+      pixel[pack (y + 5, x + 1)].x = EMIT_OFF;
 #endif
 
       break;
 
     case '5':
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 3)].x = 0;
-      pixel[pack (y + 0, x + 4)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 3)].x = 0;
-      pixel[pack (y + 1, x + 4)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 1)].x = 0;
-      pixel[pack (y + 2, x + 2)].x = 0;
-      pixel[pack (y + 3, x + 1)].x = 0;
-      pixel[pack (y + 3, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 1)].x = 0;
-      pixel[pack (y + 4, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 3)].x = 0;
-      pixel[pack (y + 4, x + 4)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 1)].x = 0;
-      pixel[pack (y + 5, x + 2)].x = 0;
-      pixel[pack (y + 5, x + 3)].x = 0;
-      pixel[pack (y + 5, x + 4)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
-      pixel[pack (y + 6, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 6)].x = 0;
-      pixel[pack (y + 7, x + 5)].x = 0;
-      pixel[pack (y + 7, x + 6)].x = 0;
-      pixel[pack (y + 8, x + 1)].x = 0;
-      pixel[pack (y + 8, x + 2)].x = 0;
-      pixel[pack (y + 8, x + 3)].x = 0;
-      pixel[pack (y + 8, x + 4)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 1)].x = 0;
-      pixel[pack (y + 9, x + 2)].x = 0;
-      pixel[pack (y + 9, x + 3)].x = 0;
-      pixel[pack (y + 9, x + 4)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
 
 #ifndef TRIM
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 #endif
 
       break;
 
     case '6':
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 3)].x = 0;
-      pixel[pack (y + 0, x + 4)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 3)].x = 0;
-      pixel[pack (y + 1, x + 4)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 1)].x = 0;
-      pixel[pack (y + 2, x + 2)].x = 0;
-      pixel[pack (y + 3, x + 1)].x = 0;
-      pixel[pack (y + 3, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 1)].x = 0;
-      pixel[pack (y + 4, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 3)].x = 0;
-      pixel[pack (y + 4, x + 4)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 1)].x = 0;
-      pixel[pack (y + 5, x + 2)].x = 0;
-      pixel[pack (y + 5, x + 3)].x = 0;
-      pixel[pack (y + 5, x + 4)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
-      pixel[pack (y + 6, x + 1)].x = 0;
-      pixel[pack (y + 6, x + 2)].x = 0;
-      pixel[pack (y + 6, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 6)].x = 0;
-      pixel[pack (y + 7, x + 1)].x = 0;
-      pixel[pack (y + 7, x + 2)].x = 0;
-      pixel[pack (y + 7, x + 5)].x = 0;
-      pixel[pack (y + 7, x + 6)].x = 0;
-      pixel[pack (y + 8, x + 1)].x = 0;
-      pixel[pack (y + 8, x + 2)].x = 0;
-      pixel[pack (y + 8, x + 3)].x = 0;
-      pixel[pack (y + 8, x + 4)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 2)].x = 0;
-      pixel[pack (y + 9, x + 3)].x = 0;
-      pixel[pack (y + 9, x + 4)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
 
 #ifndef TRIM
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 1)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 #endif
 
       break;
 
     case '7':
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 3)].x = 0;
-      pixel[pack (y + 0, x + 4)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 3)].x = 0;
-      pixel[pack (y + 1, x + 4)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 5)].x = 0;
-      pixel[pack (y + 2, x + 6)].x = 0;
-      pixel[pack (y + 3, x + 5)].x = 0;
-      pixel[pack (y + 3, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
-      pixel[pack (y + 6, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 6)].x = 0;
-      pixel[pack (y + 7, x + 5)].x = 0;
-      pixel[pack (y + 7, x + 6)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 
       break;
 
     case '8':
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 3)].x = 0;
-      pixel[pack (y + 0, x + 4)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 3)].x = 0;
-      pixel[pack (y + 1, x + 4)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 1)].x = 0;
-      pixel[pack (y + 2, x + 2)].x = 0;
-      pixel[pack (y + 2, x + 5)].x = 0;
-      pixel[pack (y + 2, x + 6)].x = 0;
-      pixel[pack (y + 3, x + 1)].x = 0;
-      pixel[pack (y + 3, x + 2)].x = 0;
-      pixel[pack (y + 3, x + 5)].x = 0;
-      pixel[pack (y + 3, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 3)].x = 0;
-      pixel[pack (y + 4, x + 4)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 2)].x = 0;
-      pixel[pack (y + 5, x + 3)].x = 0;
-      pixel[pack (y + 5, x + 4)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 1)].x = 0;
-      pixel[pack (y + 6, x + 2)].x = 0;
-      pixel[pack (y + 6, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 6)].x = 0;
-      pixel[pack (y + 7, x + 1)].x = 0;
-      pixel[pack (y + 7, x + 2)].x = 0;
-      pixel[pack (y + 7, x + 5)].x = 0;
-      pixel[pack (y + 7, x + 6)].x = 0;
-      pixel[pack (y + 8, x + 1)].x = 0;
-      pixel[pack (y + 8, x + 2)].x = 0;
-      pixel[pack (y + 8, x + 3)].x = 0;
-      pixel[pack (y + 8, x + 4)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 2)].x = 0;
-      pixel[pack (y + 9, x + 3)].x = 0;
-      pixel[pack (y + 9, x + 4)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
 
 #ifndef TRIM
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 1)].x = 0;
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 5, x + 1)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 1)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 #endif
 
       break;
 
     case '9':
-      pixel[pack (y + 0, x + 2)].x = 0;
-      pixel[pack (y + 0, x + 3)].x = 0;
-      pixel[pack (y + 0, x + 4)].x = 0;
-      pixel[pack (y + 0, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 1)].x = 0;
-      pixel[pack (y + 1, x + 2)].x = 0;
-      pixel[pack (y + 1, x + 3)].x = 0;
-      pixel[pack (y + 1, x + 4)].x = 0;
-      pixel[pack (y + 1, x + 5)].x = 0;
-      pixel[pack (y + 1, x + 6)].x = 0;
-      pixel[pack (y + 2, x + 1)].x = 0;
-      pixel[pack (y + 2, x + 2)].x = 0;
-      pixel[pack (y + 2, x + 5)].x = 0;
-      pixel[pack (y + 2, x + 6)].x = 0;
-      pixel[pack (y + 3, x + 1)].x = 0;
-      pixel[pack (y + 3, x + 2)].x = 0;
-      pixel[pack (y + 3, x + 5)].x = 0;
-      pixel[pack (y + 3, x + 6)].x = 0;
-      pixel[pack (y + 4, x + 1)].x = 0;
-      pixel[pack (y + 4, x + 2)].x = 0;
-      pixel[pack (y + 4, x + 3)].x = 0;
-      pixel[pack (y + 4, x + 4)].x = 0;
-      pixel[pack (y + 4, x + 5)].x = 0;
-      pixel[pack (y + 4, x + 6)].x = 0;
-      pixel[pack (y + 5, x + 2)].x = 0;
-      pixel[pack (y + 5, x + 3)].x = 0;
-      pixel[pack (y + 5, x + 4)].x = 0;
-      pixel[pack (y + 5, x + 5)].x = 0;
-      pixel[pack (y + 5, x + 6)].x = 0;
-      pixel[pack (y + 6, x + 5)].x = 0;
-      pixel[pack (y + 6, x + 6)].x = 0;
-      pixel[pack (y + 7, x + 5)].x = 0;
-      pixel[pack (y + 7, x + 6)].x = 0;
-      pixel[pack (y + 8, x + 5)].x = 0;
-      pixel[pack (y + 8, x + 6)].x = 0;
-      pixel[pack (y + 9, x + 5)].x = 0;
-      pixel[pack (y + 9, x + 6)].x = 0;
+      pixel[pack (y + 0, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 1, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 2, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 3, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 4, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 2)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 3)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 4)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 6, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 7, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 8, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 5)].x = EMIT_OFF;
+      pixel[pack (y + 9, x + 6)].x = EMIT_OFF;
 
 #ifndef TRIM
-      pixel[pack (y + 0, x + 1)].x = 0;
-      pixel[pack (y + 0, x + 6)].x = 0;
-      pixel[pack (y + 5, x + 1)].x = 0;
+      pixel[pack (y + 0, x + 1)].x = EMIT_OFF;
+      pixel[pack (y + 0, x + 6)].x = EMIT_OFF;
+      pixel[pack (y + 5, x + 1)].x = EMIT_OFF;
 #endif
 
       break;
@@ -783,7 +784,7 @@ paint_line (gfloat x0,
   gint x  = x2;
   gint y  = y2;
 
-  pixel[pack (y, x)].x = 0;
+  pixel[pack (y, x)].x = EMIT_OFF;
 
   while (x != x3 || y != y3)
   {
@@ -795,7 +796,7 @@ paint_line (gfloat x0,
     if (!dx || d1 >= d2)
       y += dy;
 
-    pixel[pack (y, x)].x = 0;
+    pixel[pack (y, x)].x = EMIT_OFF;
   }
 }
 
@@ -824,7 +825,7 @@ paint_front (void)
 
   {
     gfloat r = (rows - get_height (0) - 3 * SPACE) / 2.0;
-    gfloat x = cols >> 1;
+    gfloat x = (cols - 1) >> 1;
     gfloat y = (gint) (SPACE + r + 0.5);
 
     time_t     t;
@@ -1003,7 +1004,7 @@ main (int   argc,
         if (inf < EMIT_IN)
           emit_data[4 * k + 3] = 255;
         else if (inf < EMIT_OUT)
-          emit_data[4 * k + 3] =  32;
+          emit_data[4 * k + 3] =  16;
 
         if (two < 1)
           glow_data[4 * k + 3] = 128 * (1 - two) * (1 - two);

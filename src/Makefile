@@ -1,7 +1,7 @@
 .PHONY: all install uninstall clean
 
 CFLAGS = -ansi -pedantic -Wall $(shell pkg-config --cflags clutter-1.0)
-LIBS   = $(shell pkg-config --libs clutter-1.0)
+LIBS   = -lm $(shell pkg-config --libs clutter-1.0)
 
 all: cube-twister glow-clock
 
