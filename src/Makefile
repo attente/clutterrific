@@ -3,13 +3,16 @@
 CFLAGS = -ansi -pedantic -Wall $(shell pkg-config --cflags clutter-1.0)
 LIBS   = -lm $(shell pkg-config --libs clutter-1.0)
 
-all: cube-twister glow-clock
+all: cube-twister glow-clock memorrific
 
 cube-twister: cube-twister.o clutterrific.o
 	gcc $(LIBS) -o cube-twister cube-twister.o clutterrific.o
 
 glow-clock: glow-clock.o clutterrific.o
 	gcc $(LIBS) -o glow-clock glow-clock.o clutterrific.o
+
+memorrific: memorrific.o clutterrific.o
+	gcc $(LIBS) -o memorrific memorrific.o clutterrific.o
 
 install:
 	cp cube-twister /usr/lib/gnome-screensaver/gnome-screensaver/
@@ -26,4 +29,4 @@ uninstall:
 	-rm /usr/share/applications/screensavers/glow-clock.desktop
 
 clean:
-	-rm cube-twister glow-clock *.o
+	-rm cube-twister glow-clock memorrific *.o
