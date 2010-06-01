@@ -22,17 +22,31 @@
 
 #define SCHEMES            9
 
-#define COLOUR_RATE        0.2
+#define FADE_TIME       5000
 
-#define MIN_THEME_TIME 10000
+#define MIN_THEME_TIME 15000
 
-#define MAX_THEME_TIME 20000
+#define MAX_THEME_TIME 25000
 
 
 
 #include <clutter/clutter.h>
 
 #include "clutterrific.h"
+
+
+
+typedef struct
+{
+  gfloat h;
+
+  gfloat s;
+
+  gfloat l;
+
+  gfloat a;
+}
+FineColour;
 
 
 
@@ -47,9 +61,9 @@
  * ColourSchemes should return a random colour based on all three parameters.
  */
 
-typedef ClutterColor (*ColourScheme) (const ClutterColor *base,
-                                      const ClutterColor *target,
-                                      gfloat              parameter);
+typedef FineColour (*ColourScheme) (const FineColour *base,
+                                    const FineColour *target,
+                                    gfloat            parameter);
 
 
 
@@ -59,94 +73,102 @@ static gfloat       height;
 
 static ColourScheme SCHEME[SCHEMES];
 
-static ClutterColor stage_colour;
+static FineColour   stage_colour;
 
-static ClutterColor target_colour;
+static FineColour   target_colour;
 
 static ColourScheme scheme;
 
-static ClutterColor scheme_colour;
+static FineColour   scheme_colour;
 
 static gfloat       scheme_parameter;
 
 
 
-static ClutterColor
-get_random_achromatic_colour (const ClutterColor *base,
-                              const ClutterColor *target,
-                              gfloat              parameter)
+static FineColour
+get_random_achromatic_colour (const FineColour *base,
+                              const FineColour *target,
+                              gfloat            parameter)
+{
+  FineColour colour;
+
+  colour.h = parameter;
+  colour.s = 1;
+  colour.l = 0.95;
+  colour.a = 1;
+
+  return colour;
+}
+
+
+
+static FineColour
+get_random_monochromatic_colour (const FineColour *base,
+                                 const FineColour *target,
+                                 gfloat            parameter)
 {
 }
 
 
 
-static ClutterColor
-get_random_monochromatic_colour (const ClutterColor *base,
-                                 const ClutterColor *target,
-                                 gfloat              parameter)
+static FineColour
+get_random_analogous_colour (const FineColour *base,
+                             const FineColour *target,
+                             gfloat            parameter)
 {
 }
 
 
 
-static ClutterColor
-get_random_analogous_colour (const ClutterColor *base,
-                             const ClutterColor *target,
-                             gfloat              parameter)
+static FineColour
+get_random_complementary_colour (const FineColour *base,
+                                 const FineColour *target,
+                                 gfloat            parameter)
 {
 }
 
 
 
-static ClutterColor
-get_random_complementary_colour (const ClutterColor *base,
-                                 const ClutterColor *target,
-                                 gfloat              parameter)
+static FineColour
+get_random_triadic_colour (const FineColour *base,
+                           const FineColour *target,
+                           gfloat            parameter)
 {
 }
 
 
 
-static ClutterColor
-get_random_triadic_colour (const ClutterColor *base,
-                           const ClutterColor *target,
-                           gfloat              parameter)
+static FineColour
+get_random_tetradic_colour (const FineColour *base,
+                            const FineColour *target,
+                            gfloat            parameter)
 {
 }
 
 
 
-static ClutterColor
-get_random_tetradic_colour (const ClutterColor *base,
-                            const ClutterColor *target,
-                            gfloat              parameter)
+static FineColour
+get_random_neutral_colour (const FineColour *base,
+                           const FineColour *target,
+                           gfloat            parameter)
 {
 }
 
 
 
-static ClutterColor
-get_random_neutral_colour (const ClutterColor *base,
-                           const ClutterColor *target,
-                           gfloat              parameter)
+static FineColour
+get_random_warm_colour (const FineColour *base,
+                        const FineColour *target,
+                        gfloat            parameter)
 {
 }
 
 
 
-static ClutterColor
-get_random_warm_colour (const ClutterColor *base,
-                        const ClutterColor *target,
-                        gfloat              parameter)
-{
-}
-
-
-
-static ClutterColor
-get_random_cool_colour (const ClutterColor *base,
-                        const ClutterColor *target,
-                        gfloat              parameter)
+static FineColour
+get_random_cool_colour (const FineColour *base,
+                        const FineColour *target,
+                        gfloat            parameter)
 {
 }
 
@@ -170,12 +192,27 @@ get_delta (GTimeVal *time)
 
 
 
+static ClutterColor
+get_colour (const FineColour *data)
+{
+  ClutterColor colour;
+
+  clutter_color_from_hls (&colour, 360 * data->h, data->l, data->s);
+
+  colour.alpha = CLAMP (256 * data->a, 0, 255);
+
+  return colour;
+}
+
+
+
 static void
 select_theme (ClutterTimeline *timeline,
               gpointer         data)
 {
   scheme           = SCHEME[g_random_int_range (0, 1/*SCHEMES*/)];
   scheme_parameter = g_random_double ();
+  stage_colour     = target_colour;
   scheme_colour    = scheme (NULL, NULL, scheme_parameter);
   target_colour    = scheme (&scheme_colour, NULL, scheme_parameter);
 }
@@ -187,22 +224,32 @@ update_theme (ClutterTimeline *timeline,
               gint             time,
               gpointer         data)
 {
-  static GTimeVal then = { 0 };
+  gfloat     dh;
+  gfloat     ratio;
+  FineColour colour;
 
-  gdouble dt = get_delta (&then);
+  ratio = CLAMP ((gfloat) time / FADE_TIME, 0, 1);
+  dh    = target_colour.h - stage_colour.h;
 
-  gfloat h0, s0, l0;
-  gfloat h1, s1, l1;
+  if (dh < -0.5)
+    dh++;
+  else if (dh > 0.5)
+    dh--;
 
-  clutter_color_to_hls (&stage_colour,  &h0, &l0, &s0);
-  clutter_color_to_hls (&target_colour, &h1, &l1, &s1);
+  colour.h = stage_colour.h + ratio * dh;
+  colour.s = stage_colour.s + ratio * (target_colour.s - stage_colour.s);
+  colour.l = stage_colour.l + ratio * (target_colour.l - stage_colour.l);
 
-  h0 += CLAMP (h1 - h0, -COLOUR_RATE * dt, COLOUR_RATE * dt);
-  s0 += CLAMP (s1 - s0, -COLOUR_RATE * dt, COLOUR_RATE * dt);
-  l0 += CLAMP (l1 - l0, -COLOUR_RATE * dt, COLOUR_RATE * dt);
+  if (colour.h < 0)
+    colour.h++;
+  else if (colour.h >= 1)
+    colour.h--;
 
-  clutter_color_from_hls  (&stage_colour, h0, l0, s0);
-  clutter_stage_set_color (CLUTTER_STAGE (clutter_stage_get_default ()), &stage_colour);
+  {
+    ClutterColor real = get_colour (&colour);
+
+    clutter_stage_set_color (CLUTTER_STAGE (clutter_stage_get_default ()), &real);
+  }
 }
 
 
@@ -243,16 +290,20 @@ main (int   argc,
   SCHEME[7] = get_random_warm_colour;
   SCHEME[8] = get_random_cool_colour;
 
-  stage_colour.red   = 0;
-  stage_colour.green = 0;
-  stage_colour.blue  = 0;
-  stage_colour.alpha = 0;
+  stage_colour.h = 0;
+  stage_colour.s = 0;
+  stage_colour.l = 0;
+  stage_colour.a = 0;
 
   stage = clutter_stage_get_default ();
 
-  clutter_stage_set_color (CLUTTER_STAGE (stage), &stage_colour);
-  clutter_actor_show_all  (stage);
-  clutter_actor_get_size  (stage, &width, &height);
+  {
+    ClutterColor colour = get_colour (&stage_colour);
+
+    clutter_stage_set_color (CLUTTER_STAGE (stage), &colour);
+    clutter_actor_show_all  (stage);
+    clutter_actor_get_size  (stage, &width, &height);
+  }
 
   {
     ClutterTimeline *timeline = clutter_timeline_new (g_random_int_range (MIN_THEME_TIME, MAX_THEME_TIME + 1));
