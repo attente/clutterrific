@@ -574,6 +574,9 @@ get_delta (GTimeVal *time)
 static gint
 get_remaining_time (ClutterTimeline *timeline)
 {
+  if (!CLUTTER_IS_TIMELINE (timeline))
+    return 0;
+
   return clutter_timeline_get_duration     (timeline)
        - clutter_timeline_get_elapsed_time (timeline);
 }
