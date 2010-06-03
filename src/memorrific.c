@@ -283,9 +283,9 @@ get_random_achromatic_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = parameter;
+  colour.h = g_random_double ();
   colour.s = 1;
-  colour.l = 0.95;
+  colour.l = g_random_double ();
   colour.a = 1;
 
   return colour;
@@ -521,7 +521,7 @@ swipe_style_random_frame (void)
 {
   Frame frame;
 
-  if (g_random_boolean ())
+  if (g_random_boolean () || TRUE)
   {
     frame.r[0].y[0] = g_random_double_range (-SWIPE_STYLE_MIN_SIZE * height, height);
     frame.r[1].y[0] = frame.r[0].y[0];
@@ -532,6 +532,17 @@ swipe_style_random_frame (void)
     frame.r[1].y[1] = frame.r[0].y[1];
     frame.r[2].y[1] = frame.r[0].y[1];
     frame.r[3].y[1] = frame.r[0].y[1];
+
+    frame.r[0].x[0] = g_random_double_range (0.0, 0.4);
+    frame.r[0].x[1] = frame.r[0].x[0];
+    frame.r[1].x[0] = frame.r[0].x[0] + g_random_double_range (0, 200);
+    frame.r[1].x[1] = frame.r[1].x[0] + g_random_double_range (100, 300);
+    frame.r[2].x[0] = frame.r[1].x[0] + g_random_double_range (100, 400);
+    frame.r[2].x[1] = MAX (frame.r[1].x[1], frame.r[2].x[0]) + g_random_double_range (100, 300);
+    frame.r[3].x[0] = frame.r[2].x[1] + g_random_double_range (0, 200);
+    frame.r[3].x[1] = frame.r[3].x[0];
+    frame.t[0] = g_random_double_range (0.1, 0.4);
+    frame.t[1] = g_random_double_range (0.6, 0.9);
   }
   else
   {
