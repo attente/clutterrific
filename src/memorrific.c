@@ -20,35 +20,51 @@
 
 
 
-#define SCHEMES                  9
+#define SCHEMES                    9
 
-#define FADE_TIME             5000
+#define FADE_TIME               5000
 
-#define MIN_THEME_TIME       15000
+#define MIN_THEME_TIME         15000
 
-#define MAX_THEME_TIME       25000
+#define MAX_THEME_TIME         25000
 
-#define STYLES                   1
+#define STYLES                     1
 
-#define SWIPE_STYLE_SWATCHES    64
+#define SWIPE_STYLE_SWATCHES      32
 
-#define SWIPE_STYLE_MEMORIES     8
+#define SWIPE_STYLE_MEMORIES       8
 
-#define SWIPE_STYLE_MIN_TIME 20000
+#define SWIPE_STYLE_MIN_TIME   20000
 
-#define SWIPE_STYLE_MAX_TIME 30000
+#define SWIPE_STYLE_MAX_TIME   30000
 
-#define SWIPE_STYLE_MIN_WAIT  1000
+#define SWIPE_STYLE_MIN_WAIT    1000
 
-#define SWIPE_STYLE_MAX_WAIT  5000
+#define SWIPE_STYLE_MAX_WAIT   10000
 
-#define SWIPE_STYLE_MIN_LIFE  3000
+#define SWIPE_STYLE_MIN_LIFE    3000
 
-#define SWIPE_STYLE_MAX_LIFE  7000
+#define SWIPE_STYLE_MAX_LIFE    7000
 
-#define SWIPE_STYLE_MIN_SIZE     0.1
+#define SWIPE_STYLE_MIN_SIZE       0.1
 
-#define SWIPE_STYLE_MAX_SIZE     0.3
+#define SWIPE_STYLE_MAX_SIZE       0.3
+
+#define SWIPE_STYLE_MIN_RANGE      0.5
+
+#define SWIPE_STYLE_MAX_RANGE      1.0
+
+#define SWIPE_STYLE_MIN_FULL       0.4
+
+#define SWIPE_STYLE_MAX_FULL       0.8
+
+#define SWIPE_STYLE_MIN_OFFSET     0.0
+
+#define SWIPE_STYLE_MAX_OFFSET     0.2
+
+#define SWIPE_STYLE_MIN_CHANGE     0.2
+
+#define SWIPE_STYLE_MAX_CHANGE     0.2
 
 
 
@@ -233,6 +249,9 @@ static void         swipe_style_repeat_memory       (ClutterTimeline  *timeline,
 
 static Frame        swipe_style_random_frame        (void);
 
+static void         swap                            (gfloat           *x,
+                                                     gfloat           *y);
+
 static gdouble      get_delta                       (GTimeVal         *time);
 
 static gint         get_remaining_time              (ClutterTimeline  *timeline);
@@ -298,6 +317,14 @@ get_random_monochromatic_colour (const FineColour *base,
                                  const FineColour *target,
                                  gfloat            parameter)
 {
+  FineColour colour;
+
+  colour.h = g_random_double ();
+  colour.s = 1;
+  colour.l = g_random_double ();
+  colour.a = 1;
+
+  return colour;
 }
 
 
@@ -307,6 +334,14 @@ get_random_analogous_colour (const FineColour *base,
                              const FineColour *target,
                              gfloat            parameter)
 {
+  FineColour colour;
+
+  colour.h = g_random_double ();
+  colour.s = 1;
+  colour.l = g_random_double ();
+  colour.a = 1;
+
+  return colour;
 }
 
 
@@ -316,6 +351,14 @@ get_random_complementary_colour (const FineColour *base,
                                  const FineColour *target,
                                  gfloat            parameter)
 {
+  FineColour colour;
+
+  colour.h = g_random_double ();
+  colour.s = 1;
+  colour.l = g_random_double ();
+  colour.a = 1;
+
+  return colour;
 }
 
 
@@ -325,6 +368,14 @@ get_random_triadic_colour (const FineColour *base,
                            const FineColour *target,
                            gfloat            parameter)
 {
+  FineColour colour;
+
+  colour.h = g_random_double ();
+  colour.s = 1;
+  colour.l = g_random_double ();
+  colour.a = 1;
+
+  return colour;
 }
 
 
@@ -334,6 +385,14 @@ get_random_tetradic_colour (const FineColour *base,
                             const FineColour *target,
                             gfloat            parameter)
 {
+  FineColour colour;
+
+  colour.h = g_random_double ();
+  colour.s = 1;
+  colour.l = g_random_double ();
+  colour.a = 1;
+
+  return colour;
 }
 
 
@@ -343,6 +402,14 @@ get_random_neutral_colour (const FineColour *base,
                            const FineColour *target,
                            gfloat            parameter)
 {
+  FineColour colour;
+
+  colour.h = g_random_double ();
+  colour.s = 1;
+  colour.l = g_random_double ();
+  colour.a = 1;
+
+  return colour;
 }
 
 
@@ -352,6 +419,14 @@ get_random_warm_colour (const FineColour *base,
                         const FineColour *target,
                         gfloat            parameter)
 {
+  FineColour colour;
+
+  colour.h = g_random_double ();
+  colour.s = 1;
+  colour.l = g_random_double ();
+  colour.a = 1;
+
+  return colour;
 }
 
 
@@ -361,6 +436,14 @@ get_random_cool_colour (const FineColour *base,
                         const FineColour *target,
                         gfloat            parameter)
 {
+  FineColour colour;
+
+  colour.h = g_random_double ();
+  colour.s = 1;
+  colour.l = g_random_double ();
+  colour.a = 1;
+
+  return colour;
 }
 
 
@@ -521,34 +604,122 @@ swipe_style_random_frame (void)
 {
   Frame frame;
 
-  if (g_random_boolean () || TRUE)
+  if (g_random_boolean ())
   {
-    frame.r[0].y[0] = g_random_double_range (-SWIPE_STYLE_MIN_SIZE * height, height);
+    frame.r[0].y[0] = height * g_random_double_range (-SWIPE_STYLE_MIN_SIZE, 1);
     frame.r[1].y[0] = frame.r[0].y[0];
     frame.r[2].y[0] = frame.r[0].y[0];
     frame.r[3].y[0] = frame.r[0].y[0];
 
-    frame.r[0].y[1] = frame.r[0].y[0] + g_random_double_range (SWIPE_STYLE_MIN_SIZE * height, SWIPE_STYLE_MAX_SIZE * height);
+    frame.r[0].y[1] = frame.r[0].y[0] + height * g_random_double_range (SWIPE_STYLE_MIN_SIZE, SWIPE_STYLE_MAX_SIZE);
     frame.r[1].y[1] = frame.r[0].y[1];
     frame.r[2].y[1] = frame.r[0].y[1];
     frame.r[3].y[1] = frame.r[0].y[1];
 
-    frame.r[0].x[0] = g_random_double_range (0.0, 0.4);
-    frame.r[0].x[1] = frame.r[0].x[0];
-    frame.r[1].x[0] = frame.r[0].x[0] + g_random_double_range (0, 200);
-    frame.r[1].x[1] = frame.r[1].x[0] + g_random_double_range (100, 300);
-    frame.r[2].x[0] = frame.r[1].x[0] + g_random_double_range (100, 400);
-    frame.r[2].x[1] = MAX (frame.r[1].x[1], frame.r[2].x[0]) + g_random_double_range (100, 300);
-    frame.r[3].x[0] = frame.r[2].x[1] + g_random_double_range (0, 200);
-    frame.r[3].x[1] = frame.r[3].x[0];
-    frame.t[0] = g_random_double_range (0.1, 0.4);
-    frame.t[1] = g_random_double_range (0.6, 0.9);
+    {
+      gfloat x[6];
+
+      x[0] = g_random_double_range (0, width);
+      x[1] = height * g_random_double_range (SWIPE_STYLE_MIN_RANGE,
+                                             SWIPE_STYLE_MAX_RANGE);
+      x[1] = x[0] + (g_random_boolean () ? x[1] : -x[1]);
+
+      if (g_random_boolean ())
+        swap (x + 0, x + 1);
+
+      x[2] = g_random_double_range (SWIPE_STYLE_MIN_OFFSET,
+                                    SWIPE_STYLE_MAX_OFFSET);
+      x[3] = g_random_double_range (SWIPE_STYLE_MIN_OFFSET,
+                                    SWIPE_STYLE_MAX_OFFSET);
+      x[2] = x[0] + x[2] * (x[1] - x[0]);
+      x[3] = x[1] + x[3] * (x[0] - x[1]);
+
+      x[4] = g_random_double_range (SWIPE_STYLE_MIN_FULL,
+                                    SWIPE_STYLE_MAX_FULL);
+      x[5] = g_random_double_range (SWIPE_STYLE_MIN_FULL,
+                                    SWIPE_STYLE_MAX_FULL);
+      x[4] = x[2] + x[4] * (x[3] - x[2]);
+      x[5] = x[3] + x[5] * (x[2] - x[3]);
+
+      frame.r[0].x[0] = x[0];
+      frame.r[0].x[1] = x[0];
+      frame.r[1].x[0] = x[2];
+      frame.r[1].x[1] = x[4];
+      frame.r[2].x[0] = x[5];
+      frame.r[2].x[1] = x[3];
+      frame.r[3].x[0] = x[1];
+      frame.r[3].x[1] = x[1];
+    }
+
+    frame.t[0] =     g_random_double_range (SWIPE_STYLE_MIN_CHANGE,
+                                            SWIPE_STYLE_MAX_CHANGE);
+    frame.t[1] = 1 - g_random_double_range (SWIPE_STYLE_MIN_CHANGE,
+                                            SWIPE_STYLE_MAX_CHANGE);
   }
   else
   {
+    frame.r[0].x[0] = g_random_double_range (-SWIPE_STYLE_MIN_SIZE * height, width);
+    frame.r[1].x[0] = frame.r[0].x[0];
+    frame.r[2].x[0] = frame.r[0].x[0];
+    frame.r[3].x[0] = frame.r[0].x[0];
+
+    frame.r[0].x[1] = frame.r[0].x[0] + g_random_double_range (SWIPE_STYLE_MIN_SIZE * height, SWIPE_STYLE_MAX_SIZE * height);
+    frame.r[1].x[1] = frame.r[0].x[1];
+    frame.r[2].x[1] = frame.r[0].x[1];
+    frame.r[3].x[1] = frame.r[0].x[1];
+
+    {
+      gfloat y[6];
+
+      y[0] = g_random_double_range (0, height);
+      y[1] = height * g_random_double_range (SWIPE_STYLE_MIN_RANGE,
+                                             SWIPE_STYLE_MAX_RANGE);
+      y[1] = y[0] + (g_random_boolean () ? y[1] : -y[1]);
+
+      if (g_random_boolean ())
+        swap (y + 0, y + 1);
+
+      y[2] = g_random_double_range (0, SWIPE_STYLE_MAX_OFFSET);
+      y[3] = g_random_double_range (0, SWIPE_STYLE_MAX_OFFSET);
+      y[2] = y[0] + y[2] * (y[1] - y[0]);
+      y[3] = y[1] + y[3] * (y[0] - y[1]);
+
+      y[4] = g_random_double_range (SWIPE_STYLE_MIN_FULL,
+                                    SWIPE_STYLE_MAX_FULL);
+      y[5] = g_random_double_range (SWIPE_STYLE_MIN_FULL,
+                                    SWIPE_STYLE_MAX_FULL);
+      y[4] = y[2] + y[4] * (y[3] - y[2]);
+      y[5] = y[3] + y[5] * (y[2] - y[3]);
+
+      frame.r[0].y[0] = y[0];
+      frame.r[0].y[1] = y[0];
+      frame.r[1].y[0] = y[2];
+      frame.r[1].y[1] = y[4];
+      frame.r[2].y[0] = y[5];
+      frame.r[2].y[1] = y[3];
+      frame.r[3].y[0] = y[1];
+      frame.r[3].y[1] = y[1];
+    }
+
+    frame.t[0] =     g_random_double_range (SWIPE_STYLE_MIN_CHANGE,
+                                            SWIPE_STYLE_MAX_CHANGE);
+    frame.t[1] = 1 - g_random_double_range (SWIPE_STYLE_MIN_CHANGE,
+                                            SWIPE_STYLE_MAX_CHANGE);
   }
 
   return frame;
+}
+
+
+
+static void
+swap (gfloat *x,
+      gfloat *y)
+{
+  gfloat t = *x;
+
+  *x = *y;
+  *y = t;
 }
 
 
@@ -677,7 +848,7 @@ static void
 select_theme (ClutterTimeline *timeline,
               gpointer         data)
 {
-  scheme           = SCHEME[g_random_int_range (0, 1 /* XXX: SCHEMES */)];
+  scheme           = SCHEME[g_random_int_range (0, SCHEMES)];
   scheme_parameter = g_random_double ();
   stage_colour     = target_colour;
   scheme_colour    = scheme (NULL, NULL, scheme_parameter);
@@ -770,6 +941,11 @@ update_swatch (ClutterTimeline *timeline,
   Swatch    *object = swatch;
   gfloat     ratio  = clutter_timeline_get_progress (timeline);
   Rectangle  frame  = get_frame (&object->frame, ratio);
+
+  if (frame.x[0] > frame.x[1])
+    swap (frame.x + 0, frame.x + 1);
+  if (frame.y[0] > frame.y[1])
+    swap (frame.y + 0, frame.y + 1);
 
   clutter_actor_set_position (object->actor,
                               frame.x[0],
