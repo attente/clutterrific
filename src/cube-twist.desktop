@@ -2,8 +2,8 @@
 Encoding=UTF-8
 Name=Cube Twister
 Comment=Solves a 3x3x3 twisting cube.  Clutterrific!
-Exec=/usr/lib/gnome-screensaver/gnome-screensaver/cube-twister
-TryExec=/usr/lib/gnome-screensaver/gnome-screensaver/cube-twister
+Exec=/usr/lib/gnome-screensaver/gnome-screensaver/cube-twist
+TryExec=/usr/lib/gnome-screensaver/gnome-screensaver/cube-twist
 StartupNotify=false
 Terminal=false
 Type=Application
