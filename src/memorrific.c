@@ -24,15 +24,15 @@
 
 #define FADE_TIME               5000
 
-#define MIN_THEME_TIME         15000
+#define MIN_THEME_TIME         20000
 
-#define MAX_THEME_TIME         25000
+#define MAX_THEME_TIME         30000
 
 #define STYLES                     1
 
-#define SWIPE_STYLE_SWATCHES      32
+#define SWIPE_STYLE_SWATCHES      16
 
-#define SWIPE_STYLE_MEMORIES       8
+#define SWIPE_STYLE_MEMORIES       4
 
 #define SWIPE_STYLE_MIN_TIME   20000
 
@@ -40,27 +40,27 @@
 
 #define SWIPE_STYLE_MIN_WAIT    1000
 
-#define SWIPE_STYLE_MAX_WAIT   10000
+#define SWIPE_STYLE_MAX_WAIT   20000
 
 #define SWIPE_STYLE_MIN_LIFE    3000
 
 #define SWIPE_STYLE_MAX_LIFE    7000
 
-#define SWIPE_STYLE_MIN_SIZE       0.1
+#define SWIPE_STYLE_MIN_SIZE       0.2
 
-#define SWIPE_STYLE_MAX_SIZE       0.3
+#define SWIPE_STYLE_MAX_SIZE       0.4
 
-#define SWIPE_STYLE_MIN_RANGE      0.5
+#define SWIPE_STYLE_MIN_RANGE      0.6
 
-#define SWIPE_STYLE_MAX_RANGE      1.0
+#define SWIPE_STYLE_MAX_RANGE      1.2
 
-#define SWIPE_STYLE_MIN_FULL       0.4
+#define SWIPE_STYLE_MIN_FULL       0.5
 
-#define SWIPE_STYLE_MAX_FULL       0.8
+#define SWIPE_STYLE_MAX_FULL       1.0
 
 #define SWIPE_STYLE_MIN_OFFSET     0.0
 
-#define SWIPE_STYLE_MAX_OFFSET     0.2
+#define SWIPE_STYLE_MAX_OFFSET     0.0
 
 #define SWIPE_STYLE_MIN_CHANGE     0.2
 
@@ -241,6 +241,12 @@ static void         swipe_style_create_memory       (gint              wait,
                                                      gint              life,
                                                      ClutterTimeline  *timeline);
 
+static void         swipe_style_start_swatch        (ClutterTimeline  *timeline,
+                                                     gpointer          swatch);
+
+static void         swipe_style_start_memory        (ClutterTimeline  *timeline,
+                                                     gpointer          memory);
+
 static void         swipe_style_repeat_swatch       (ClutterTimeline  *timeline,
                                                      gpointer          swatch);
 
@@ -268,6 +274,8 @@ static Rectangle    interpolate                     (const Rectangle  *r0,
 
 static Rectangle    get_frame                       (const Frame      *f,
                                                      gfloat            t);
+
+static Rectangle    get_frame_extent                (const Frame      *f);
 
 static gfloat       get_depth                       (const Frame      *f,
                                                      gfloat            t);
@@ -302,10 +310,16 @@ get_random_achromatic_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
-  colour.s = 1;
-  colour.l = g_random_double ();
+  colour.h = 0;
+  colour.s = 0;
   colour.a = 1;
+
+  if (base == NULL || target == NULL)
+    colour.l = (gint) (parameter + 0.5);
+  else if (parameter < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.0, 0.5);
 
   return colour;
 }
@@ -319,10 +333,18 @@ get_random_monochromatic_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
+  colour.h = base == NULL ? g_random_double () : base->h;
   colour.s = 1;
-  colour.l = g_random_double ();
   colour.a = 1;
+
+  if (base == NULL)
+    colour.l = (gint) (3.0 * parameter + 0.5) / 3.0;
+  else if (base != NULL && target == NULL)
+    colour.l = base->l;
+  else if (base->l < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.2, 0.5);
 
   return colour;
 }
@@ -497,21 +519,11 @@ swipe_style_create_swatch (gint             wait,
     ClutterTimeline *thread = clutter_timeline_new (life);
     Swatch          *swatch = g_new (Swatch, 1);
 
-    {
-      FineColour    colour = scheme (&scheme_colour, &target_colour, scheme_parameter);
-      ClutterColor  color  = get_colour (&colour);
-      ClutterActor *stage  = clutter_stage_get_default ();
-
-      swatch->frame = swipe_style_random_frame ();
-      swatch->actor = clutter_rectangle_new_with_color (&color);
-      swatch->owner = timeline;
-
-      clutter_actor_hide          (swatch->actor);
-      clutter_container_add_actor (CLUTTER_CONTAINER (stage), swatch->actor);
-    }
+    swatch->owner = timeline;
 
     clutter_timeline_set_delay (thread, wait);
 
+    g_signal_connect       (thread, "started",   G_CALLBACK (swipe_style_start_swatch),  swatch);
     g_signal_connect       (thread, "new-frame", G_CALLBACK (update_swatch),             swatch);
     g_signal_connect_after (thread, "completed", G_CALLBACK (swipe_style_repeat_swatch), swatch);
 
@@ -528,31 +540,59 @@ swipe_style_create_memory (gint             wait,
 {
   gint time = get_remaining_time (timeline);
 
-  return;
+  return; /* XXX */
 
   if (wait + life < time)
   {
     ClutterTimeline *thread = clutter_timeline_new (life);
     Memory          *memory = g_new (Memory, 1);
 
-    {
-      ClutterActor *stage = clutter_stage_get_default ();
-
-      memory->swatch.frame = swipe_style_random_frame ();
-      /* XXX: Initialize the actor and start/finish rectangles */
-      memory->swatch.owner = timeline;
-
-      clutter_actor_hide          (memory->swatch.actor);
-      clutter_container_add_actor (CLUTTER_CONTAINER (stage), memory->swatch.actor);
-    }
+    memory->swatch.owner = timeline;
 
     clutter_timeline_set_delay (thread, wait);
 
+    g_signal_connect       (thread, "started",   G_CALLBACK (swipe_style_start_memory),  memory);
     g_signal_connect       (thread, "new-frame", G_CALLBACK (update_memory),             memory);
     g_signal_connect_after (thread, "completed", G_CALLBACK (swipe_style_repeat_memory), memory);
 
     clutter_timeline_start (thread);
   }
+}
+
+
+
+static void
+swipe_style_start_swatch (ClutterTimeline *timeline,
+                          gpointer         swatch)
+{
+  FineColour    colour = scheme (&scheme_colour, &target_colour, scheme_parameter);
+  ClutterColor  color  = get_colour (&colour);
+  ClutterActor *stage  = clutter_stage_get_default ();
+  Swatch       *object = swatch;
+
+  object->frame = swipe_style_random_frame ();
+  object->actor = clutter_rectangle_new_with_color (&color);
+
+  clutter_actor_hide          (object->actor);
+  clutter_container_add_actor (CLUTTER_CONTAINER (stage), object->actor);
+}
+
+
+
+static void
+swipe_style_start_memory (ClutterTimeline *timeline,
+                          gpointer         memory)
+{
+  ClutterActor *stage  = clutter_stage_get_default ();
+  Memory       *object = memory;
+  Rectangle     extent;
+
+  object->swatch.frame = swipe_style_random_frame ();
+  extent               = get_frame_extent (&object->swatch.frame);
+  /* XXX: Initialize the actor and start/finish rectangles */
+
+  clutter_actor_hide          (object->swatch.actor);
+  clutter_container_add_actor (CLUTTER_CONTAINER (stage), object->swatch.actor);
 }
 
 
@@ -835,6 +875,48 @@ get_frame (const Frame *f,
 
 
 
+static Rectangle
+get_frame_extent (const Frame *f)
+{
+  Rectangle r;
+
+  r.x[0] = MIN (f->r[0].x[0], f->r[0].x[1]);
+  r.x[0] = MIN (r.x[0],       f->r[1].x[0]);
+  r.x[0] = MIN (r.x[0],       f->r[1].x[1]);
+  r.x[0] = MIN (r.x[0],       f->r[2].x[0]);
+  r.x[0] = MIN (r.x[0],       f->r[2].x[1]);
+  r.x[0] = MIN (r.x[0],       f->r[3].x[0]);
+  r.x[0] = MIN (r.x[0],       f->r[3].x[1]);
+
+  r.x[1] = MAX (f->r[0].x[0], f->r[0].x[1]);
+  r.x[1] = MAX (r.x[1],       f->r[1].x[0]);
+  r.x[1] = MAX (r.x[1],       f->r[1].x[1]);
+  r.x[1] = MAX (r.x[1],       f->r[2].x[0]);
+  r.x[1] = MAX (r.x[1],       f->r[2].x[1]);
+  r.x[1] = MAX (r.x[1],       f->r[3].x[0]);
+  r.x[1] = MAX (r.x[1],       f->r[3].x[1]);
+
+  r.y[0] = MIN (f->r[0].y[0], f->r[0].y[1]);
+  r.y[0] = MIN (r.y[0],       f->r[1].y[0]);
+  r.y[0] = MIN (r.y[0],       f->r[1].y[1]);
+  r.y[0] = MIN (r.y[0],       f->r[2].y[0]);
+  r.y[0] = MIN (r.y[0],       f->r[2].y[1]);
+  r.y[0] = MIN (r.y[0],       f->r[3].y[0]);
+  r.y[0] = MIN (r.y[0],       f->r[3].y[1]);
+
+  r.y[1] = MAX (f->r[0].y[0], f->r[0].y[1]);
+  r.y[1] = MAX (r.y[1],       f->r[1].y[0]);
+  r.y[1] = MAX (r.y[1],       f->r[1].y[1]);
+  r.y[1] = MAX (r.y[1],       f->r[2].y[0]);
+  r.y[1] = MAX (r.y[1],       f->r[2].y[1]);
+  r.y[1] = MAX (r.y[1],       f->r[3].y[0]);
+  r.y[1] = MAX (r.y[1],       f->r[3].y[1]);
+
+  return r;
+}
+
+
+
 static gfloat
 get_depth (const Frame *f,
            gfloat       t)
@@ -848,7 +930,7 @@ static void
 select_theme (ClutterTimeline *timeline,
               gpointer         data)
 {
-  scheme           = SCHEME[g_random_int_range (0, SCHEMES)];
+  scheme           = SCHEME[g_random_int_range (0, /* XXX: SCHEMES */ 2)];
   scheme_parameter = g_random_double ();
   stage_colour     = target_colour;
   scheme_colour    = scheme (NULL, NULL, scheme_parameter);
@@ -947,13 +1029,16 @@ update_swatch (ClutterTimeline *timeline,
   if (frame.y[0] > frame.y[1])
     swap (frame.y + 0, frame.y + 1);
 
-  clutter_actor_set_position (object->actor,
-                              frame.x[0],
-                              frame.y[0]);
-  clutter_actor_set_size     (object->actor,
-                              get_width  (&frame),
-                              get_height (&frame));
-  clutter_actor_show         (object->actor);
+  if (object->actor != NULL)
+  {
+    clutter_actor_set_position (object->actor,
+                                frame.x[0],
+                                frame.y[0]);
+    clutter_actor_set_size     (object->actor,
+                                get_width  (&frame),
+                                get_height (&frame));
+    clutter_actor_show         (object->actor);
+  }
 }
 
 
@@ -968,18 +1053,21 @@ update_memory (ClutterTimeline *timeline,
   Rectangle  canvas = interpolate (&object->start, &object->finish, ratio);
   Rectangle  frame  = get_frame (&object->swatch.frame, ratio);
 
-  clutter_actor_set_position (object->swatch.actor,
-                              canvas.x[0],
-                              canvas.y[0]);
-  clutter_actor_set_size     (object->swatch.actor,
-                              get_width  (&canvas),
-                              get_height (&canvas));
-  clutter_actor_set_clip     (object->swatch.actor,
-                              frame.x[0] - canvas.x[0],
-                              frame.y[0] - canvas.y[0],
-                              get_width  (&frame),
-                              get_height (&frame));
-  clutter_actor_show         (object->swatch.actor);
+  if (object->swatch.actor != NULL)
+  {
+    clutter_actor_set_position (object->swatch.actor,
+                                canvas.x[0],
+                                canvas.y[0]);
+    clutter_actor_set_size     (object->swatch.actor,
+                                get_width  (&canvas),
+                                get_height (&canvas));
+    clutter_actor_set_clip     (object->swatch.actor,
+                                frame.x[0] - canvas.x[0],
+                                frame.y[0] - canvas.y[0],
+                                get_width  (&frame),
+                                get_height (&frame));
+    clutter_actor_show         (object->swatch.actor);
+  }
 }
 
 
