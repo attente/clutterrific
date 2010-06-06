@@ -358,10 +358,18 @@ get_random_analogous_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
+  colour.h = base == NULL ? g_random_double () : base->h;
   colour.s = 1;
-  colour.l = g_random_double ();
   colour.a = 1;
+
+  if (base == NULL)
+    colour.l = (gint) (3.0 * parameter + 0.5) / 3.0;
+  else if (base != NULL && target == NULL)
+    colour.l = base->l;
+  else if (base->l < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.2, 0.5);
 
   return colour;
 }
@@ -375,10 +383,18 @@ get_random_complementary_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
+  colour.h = base == NULL ? g_random_double () : base->h;
   colour.s = 1;
-  colour.l = g_random_double ();
   colour.a = 1;
+
+  if (base == NULL)
+    colour.l = (gint) (3.0 * parameter + 0.5) / 3.0;
+  else if (base != NULL && target == NULL)
+    colour.l = base->l;
+  else if (base->l < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.2, 0.5);
 
   return colour;
 }
@@ -392,10 +408,18 @@ get_random_triadic_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
+  colour.h = base == NULL ? g_random_double () : base->h;
   colour.s = 1;
-  colour.l = g_random_double ();
   colour.a = 1;
+
+  if (base == NULL)
+    colour.l = (gint) (3.0 * parameter + 0.5) / 3.0;
+  else if (base != NULL && target == NULL)
+    colour.l = base->l;
+  else if (base->l < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.2, 0.5);
 
   return colour;
 }
@@ -409,10 +433,18 @@ get_random_tetradic_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
+  colour.h = base == NULL ? g_random_double () : base->h;
   colour.s = 1;
-  colour.l = g_random_double ();
   colour.a = 1;
+
+  if (base == NULL)
+    colour.l = (gint) (3.0 * parameter + 0.5) / 3.0;
+  else if (base != NULL && target == NULL)
+    colour.l = base->l;
+  else if (base->l < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.2, 0.5);
 
   return colour;
 }
@@ -426,10 +458,18 @@ get_random_neutral_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
+  colour.h = base == NULL ? g_random_double () : base->h;
   colour.s = 1;
-  colour.l = g_random_double ();
   colour.a = 1;
+
+  if (base == NULL)
+    colour.l = (gint) (3.0 * parameter + 0.5) / 3.0;
+  else if (base != NULL && target == NULL)
+    colour.l = base->l;
+  else if (base->l < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.2, 0.5);
 
   return colour;
 }
@@ -443,10 +483,18 @@ get_random_warm_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
+  colour.h = base == NULL ? g_random_double () : base->h;
   colour.s = 1;
-  colour.l = g_random_double ();
   colour.a = 1;
+
+  if (base == NULL)
+    colour.l = (gint) (3.0 * parameter + 0.5) / 3.0;
+  else if (base != NULL && target == NULL)
+    colour.l = base->l;
+  else if (base->l < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.2, 0.5);
 
   return colour;
 }
@@ -460,10 +508,18 @@ get_random_cool_colour (const FineColour *base,
 {
   FineColour colour;
 
-  colour.h = g_random_double ();
+  colour.h = base == NULL ? g_random_double () : base->h;
   colour.s = 1;
-  colour.l = g_random_double ();
   colour.a = 1;
+
+  if (base == NULL)
+    colour.l = (gint) (3.0 * parameter + 0.5) / 3.0;
+  else if (base != NULL && target == NULL)
+    colour.l = base->l;
+  else if (base->l < 0.5)
+    colour.l = g_random_double_range (0.5, 1.0);
+  else
+    colour.l = g_random_double_range (0.2, 0.5);
 
   return colour;
 }
@@ -930,7 +986,7 @@ static void
 select_theme (ClutterTimeline *timeline,
               gpointer         data)
 {
-  scheme           = SCHEME[g_random_int_range (0, /* XXX: SCHEMES */ 2)];
+  scheme           = SCHEME[g_random_int_range (0, SCHEMES)];
   scheme_parameter = g_random_double ();
   stage_colour     = target_colour;
   scheme_colour    = scheme (NULL, NULL, scheme_parameter);
@@ -944,32 +1000,17 @@ update_theme (ClutterTimeline *timeline,
               gint             time,
               gpointer         data)
 {
-  gfloat     dh;
-  gfloat     ratio;
-  FineColour colour;
+  gfloat       ratio  = CLAMP ((gfloat) time / FADE_TIME, 0, 1);
+  ClutterColor stage  = get_colour (&stage_colour);
+  ClutterColor target = get_colour (&target_colour);
+  ClutterColor colour;
 
-  ratio = CLAMP ((gfloat) time / FADE_TIME, 0, 1);
-  dh    = target_colour.h - stage_colour.h;
+  colour.red   = stage.red   + ratio * (target.red   - stage.red);
+  colour.green = stage.green + ratio * (target.green - stage.green);
+  colour.blue  = stage.blue  + ratio * (target.blue  - stage.blue);
+  colour.alpha = stage.alpha + ratio * (target.alpha - stage.alpha);
 
-  if (dh < -0.5)
-    dh++;
-  else if (dh > 0.5)
-    dh--;
-
-  colour.h = stage_colour.h + ratio * dh;
-  colour.s = stage_colour.s + ratio * (target_colour.s - stage_colour.s);
-  colour.l = stage_colour.l + ratio * (target_colour.l - stage_colour.l);
-
-  if (colour.h < 0)
-    colour.h++;
-  else if (colour.h >= 1)
-    colour.h--;
-
-  {
-    ClutterColor real = get_colour (&colour);
-
-    clutter_stage_set_color (CLUTTER_STAGE (clutter_stage_get_default ()), &real);
-  }
+  clutter_stage_set_color (CLUTTER_STAGE (clutter_stage_get_default ()), &colour);
 }
 
 
