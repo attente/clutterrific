@@ -1,2 +1,8 @@
+*.o
+.deps
+config.h
+config.h.in
 cube-twist
 glow-clock
+Makefile.in
+stamp-h1
