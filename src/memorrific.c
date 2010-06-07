@@ -259,6 +259,10 @@ static void         swipe_style_repeat_memory       (ClutterTimeline  *timeline,
 
 static Frame        swipe_style_random_frame        (void);
 
+static Rectangle    swipe_style_random_canvas       (const Rectangle  *extent,
+                                                     gint              w,
+                                                     gint              h);
+
 static void         swap                            (gfloat           *x,
                                                      gfloat           *y);
 
@@ -547,12 +551,15 @@ swipe_style_start (ClutterTimeline *timeline,
     swipe_style_create_swatch (wait, life, timeline);
   }
 
-  for (i = 0; i < SWIPE_STYLE_MEMORIES; i++)
+  if (file->len)
   {
-    wait = g_random_int_range (SWIPE_STYLE_MIN_WAIT, SWIPE_STYLE_MAX_WAIT + 1);
-    life = g_random_int_range (SWIPE_STYLE_MIN_LIFE, SWIPE_STYLE_MAX_LIFE + 1);
+    for (i = 0; i < SWIPE_STYLE_MEMORIES; i++)
+    {
+      wait = g_random_int_range (SWIPE_STYLE_MIN_WAIT, SWIPE_STYLE_MAX_WAIT + 1);
+      life = g_random_int_range (SWIPE_STYLE_MIN_LIFE, SWIPE_STYLE_MAX_LIFE + 1);
 
-    swipe_style_create_memory (wait, life, timeline);
+      swipe_style_create_memory (wait, life, timeline);
+    }
   }
 }
 
@@ -600,8 +607,6 @@ swipe_style_create_memory (gint             wait,
 {
   gint time = get_remaining_time (timeline);
 
-  return; /* XXX */
-
   if (wait + life < time)
   {
     ClutterTimeline *thread = clutter_timeline_new (life);
@@ -643,16 +648,37 @@ static void
 swipe_style_start_memory (ClutterTimeline *timeline,
                           gpointer         memory)
 {
-  ClutterActor *stage  = clutter_stage_get_default ();
   Memory       *object = memory;
   Rectangle     extent;
+  gint          i;
 
   object->swatch.frame = swipe_style_random_frame ();
   extent               = get_frame_extent (&object->swatch.frame);
-  /* XXX: Initialize the actor and start/finish rectangles */
+  object->swatch.actor = NULL;
 
-  clutter_actor_hide          (object->swatch.actor);
-  clutter_container_add_actor (CLUTTER_CONTAINER (stage), object->swatch.actor);
+  for (i = 0; i < file->len && object->swatch.actor == NULL; i++)
+  {
+    const gchar *path = file->pdata[g_random_int_range (0, file->len)];
+
+    object->swatch.actor = clutter_texture_new_from_file (path, NULL);
+  }
+
+  if (object->swatch.actor != NULL)
+  {
+    ClutterTexture *texture = CLUTTER_TEXTURE (object->swatch.actor);
+    ClutterActor   *stage   = clutter_stage_get_default ();
+    gint            w;
+    gint            h;
+
+    clutter_texture_get_base_size (texture, &w, &h);
+
+    object->start  = swipe_style_random_canvas (&extent, w, h);
+    object->finish = swipe_style_random_canvas (&extent, w, h);
+
+    clutter_actor_hide          (object->swatch.actor);
+    clutter_container_add_actor (CLUTTER_CONTAINER (stage),
+                                 object->swatch.actor);
+  }
 }
 
 
@@ -685,13 +711,17 @@ swipe_style_repeat_memory (ClutterTimeline *timeline,
   Memory          *object = memory;
   ClutterTimeline *owner  = object->swatch.owner;
 
-  clutter_actor_destroy (object->swatch.actor);
-  g_free                (object);
-  g_object_unref        (timeline);
+  if (object->swatch.actor != NULL)
+    clutter_actor_destroy (object->swatch.actor);
+
+  g_free         (object);
+  g_object_unref (timeline);
 
   {
-    gint wait = g_random_int_range (SWIPE_STYLE_MIN_WAIT, SWIPE_STYLE_MAX_WAIT + 1);
-    gint life = g_random_int_range (SWIPE_STYLE_MIN_LIFE, SWIPE_STYLE_MAX_LIFE + 1);
+    gint wait = g_random_int_range (SWIPE_STYLE_MIN_WAIT,
+                                    SWIPE_STYLE_MAX_WAIT + 1);
+    gint life = g_random_int_range (SWIPE_STYLE_MIN_LIFE,
+                                    SWIPE_STYLE_MAX_LIFE + 1);
 
     swipe_style_create_memory (wait, life, owner);
   }
@@ -808,6 +838,16 @@ swipe_style_random_frame (void)
   }
 
   return frame;
+}
+
+
+
+static Rectangle
+swipe_style_random_canvas (const Rectangle *extent,
+                           gint             w,
+                           gint             h)
+{
+  return *extent;
 }
 
 
