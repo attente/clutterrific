@@ -20,6 +20,8 @@
 
 
 
+#define EXTENSIONS             "jpg|png"
+
 #define SCHEMES                    9
 
 #define FADE_TIME               5000
@@ -171,23 +173,25 @@ Memory;
 
 
 
-static gfloat       width;
+static gfloat        width;
 
-static gfloat       height;
+static gfloat        height;
 
-static ColourScheme SCHEME[SCHEMES];
+static ColourScheme  SCHEME[SCHEMES];
 
-static FineColour   stage_colour;
+static FineColour    stage_colour;
 
-static FineColour   target_colour;
+static FineColour    target_colour;
 
-static ColourScheme scheme;
+static ColourScheme  scheme;
 
-static FineColour   scheme_colour;
+static FineColour    scheme_colour;
 
-static gfloat       scheme_parameter;
+static gfloat        scheme_parameter;
 
-static Style        STYLE[STYLES];
+static Style         STYLE[STYLES];
+
+static GPtrArray    *file;
 
 
 
@@ -1122,6 +1126,8 @@ main (int   argc,
   clutter_init      (&argc, &argv);
   clutterrific_init (&argc, &argv);
 
+  file = clutterrific_list (g_get_user_special_dir (G_USER_DIRECTORY_PICTURES), "(?i)\\.(" EXTENSIONS ")$");
+
   SCHEME[0] = get_random_achromatic_colour;
   SCHEME[1] = get_random_monochromatic_colour;
   SCHEME[2] = get_random_analogous_colour;
@@ -1157,6 +1163,8 @@ main (int   argc,
   start_style (NULL, STYLE);
 
   clutter_main ();
+
+  g_ptr_array_unref (file);
 
   return 0;
 }
