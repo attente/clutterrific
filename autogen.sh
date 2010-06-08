@@ -11,6 +11,7 @@ CRAP="aclocal.m4
       Makefile
       Makefile.in
       missing
+      src/.deps
       src/config.h
       src/config.h.in
       src/Makefile
