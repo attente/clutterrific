@@ -32,21 +32,23 @@
 
 #define STYLES                     1
 
-#define SWIPE_STYLE_SWATCHES      16
+#define SWIPE_STYLE_SWATCHES       9
 
-#define SWIPE_STYLE_MEMORIES       4
+#define SWIPE_STYLE_MEMORIES       3
 
 #define SWIPE_STYLE_MIN_TIME   20000
 
 #define SWIPE_STYLE_MAX_TIME   30000
 
-#define SWIPE_STYLE_MIN_WAIT    1000
+#define SWIPE_STYLE_MIN_WAIT    2000
 
-#define SWIPE_STYLE_MAX_WAIT   20000
+#define SWIPE_STYLE_MAX_WAIT    6000
 
 #define SWIPE_STYLE_MIN_LIFE    3000
 
 #define SWIPE_STYLE_MAX_LIFE    7000
+
+#define SWIPE_STYLE_SCALE_UP       1.0
 
 #define SWIPE_STYLE_MIN_SIZE       0.2
 
@@ -63,6 +65,10 @@
 #define SWIPE_STYLE_MIN_OFFSET     0.0
 
 #define SWIPE_STYLE_MAX_OFFSET     0.0
+
+#define SWIPE_STYLE_MIN_ZOOM       0.1
+
+#define SWIPE_STYLE_MAX_ZOOM       0.3
 
 #define SWIPE_STYLE_MIN_CHANGE     0.2
 
@@ -257,11 +263,12 @@ static void         swipe_style_repeat_swatch       (ClutterTimeline  *timeline,
 static void         swipe_style_repeat_memory       (ClutterTimeline  *timeline,
                                                      gpointer          memory);
 
-static Frame        swipe_style_random_frame        (void);
+static Frame        swipe_style_random_frame        (gfloat            zoom);
 
 static Rectangle    swipe_style_random_canvas       (const Rectangle  *extent,
-                                                     gint              w,
-                                                     gint              h);
+                                                     gint              cols,
+                                                     gint              rows,
+                                                     gfloat            zoom);
 
 static void         swap                            (gfloat           *x,
                                                      gfloat           *y);
@@ -275,6 +282,8 @@ static ClutterColor get_colour                      (const FineColour *data);
 static gfloat       get_width                       (const Rectangle  *r);
 
 static gfloat       get_height                      (const Rectangle  *r);
+
+static void         orient                          (Rectangle        *r);
 
 static Rectangle    interpolate                     (const Rectangle  *r0,
                                                      const Rectangle  *r1,
@@ -551,7 +560,7 @@ swipe_style_start (ClutterTimeline *timeline,
     swipe_style_create_swatch (wait, life, timeline);
   }
 
-  if (file->len)
+  if (file != NULL && file->len)
   {
     for (i = 0; i < SWIPE_STYLE_MEMORIES; i++)
     {
@@ -613,6 +622,19 @@ swipe_style_create_memory (gint             wait,
     Memory          *memory = g_new (Memory, 1);
 
     memory->swatch.owner = timeline;
+    memory->swatch.actor = NULL;
+
+    if (file != NULL)
+    {
+      gint i;
+
+      for (i = 0; i < file->len && memory->swatch.actor == NULL; i++)
+      {
+        const gchar *path = file->pdata[g_random_int_range (0, file->len)];
+
+        memory->swatch.actor = clutter_texture_new_from_file (path, NULL);
+      }
+    }
 
     clutter_timeline_set_delay (thread, wait);
 
@@ -635,8 +657,11 @@ swipe_style_start_swatch (ClutterTimeline *timeline,
   ClutterActor *stage  = clutter_stage_get_default ();
   Swatch       *object = swatch;
 
-  object->frame = swipe_style_random_frame ();
+  object->frame = swipe_style_random_frame (0);
   object->actor = clutter_rectangle_new_with_color (&color);
+
+  object->frame.z[0] = g_random_double_range (-1, 0);
+  object->frame.z[1] = object->frame.z[0];
 
   clutter_actor_hide          (object->actor);
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), object->actor);
@@ -648,32 +673,38 @@ static void
 swipe_style_start_memory (ClutterTimeline *timeline,
                           gpointer         memory)
 {
-  Memory       *object = memory;
-  Rectangle     extent;
-  gint          i;
+  Memory    *object = memory;
+  Rectangle  extent;
 
-  object->swatch.frame = swipe_style_random_frame ();
+  object->swatch.frame = swipe_style_random_frame (SWIPE_STYLE_SCALE_UP);
   extent               = get_frame_extent (&object->swatch.frame);
-  object->swatch.actor = NULL;
 
-  for (i = 0; i < file->len && object->swatch.actor == NULL; i++)
-  {
-    const gchar *path = file->pdata[g_random_int_range (0, file->len)];
-
-    object->swatch.actor = clutter_texture_new_from_file (path, NULL);
-  }
+  object->swatch.frame.z[0] = g_random_double_range (0, 1);
+  object->swatch.frame.z[1] = object->swatch.frame.z[0];
 
   if (object->swatch.actor != NULL)
   {
     ClutterTexture *texture = CLUTTER_TEXTURE (object->swatch.actor);
     ClutterActor   *stage   = clutter_stage_get_default ();
-    gint            w;
-    gint            h;
 
-    clutter_texture_get_base_size (texture, &w, &h);
+    gfloat zoom = g_random_double_range (SWIPE_STYLE_MIN_ZOOM,
+                                         SWIPE_STYLE_MAX_ZOOM);
 
-    object->start  = swipe_style_random_canvas (&extent, w, h);
-    object->finish = swipe_style_random_canvas (&extent, w, h);
+    gint cols;
+    gint rows;
+
+    clutter_texture_get_base_size (texture, &cols, &rows);
+
+    if (g_random_boolean ())
+    {
+      object->start  = swipe_style_random_canvas (&extent, cols, rows, 0);
+      object->finish = swipe_style_random_canvas (&extent, cols, rows, zoom);
+    }
+    else
+    {
+      object->start  = swipe_style_random_canvas (&extent, cols, rows, zoom);
+      object->finish = swipe_style_random_canvas (&extent, cols, rows, 0);
+    }
 
     clutter_actor_hide          (object->swatch.actor);
     clutter_container_add_actor (CLUTTER_CONTAINER (stage),
@@ -730,18 +761,25 @@ swipe_style_repeat_memory (ClutterTimeline *timeline,
 
 
 static Frame
-swipe_style_random_frame (void)
+swipe_style_random_frame (gfloat zoom)
 {
-  Frame frame;
+  Frame  frame;
+  gfloat size;
+
+  zoom++;
 
   if (g_random_boolean ())
   {
-    frame.r[0].y[0] = height * g_random_double_range (-SWIPE_STYLE_MIN_SIZE, 1);
+    size = height * zoom * g_random_double_range (SWIPE_STYLE_MIN_SIZE,
+                                                  SWIPE_STYLE_MAX_SIZE);
+
+    frame.r[0].y[0] = g_random_double_range (-0.5 * height * SWIPE_STYLE_MIN_SIZE,
+                                             height + 0.5 * height * SWIPE_STYLE_MIN_SIZE - size);
     frame.r[1].y[0] = frame.r[0].y[0];
     frame.r[2].y[0] = frame.r[0].y[0];
     frame.r[3].y[0] = frame.r[0].y[0];
 
-    frame.r[0].y[1] = frame.r[0].y[0] + height * g_random_double_range (SWIPE_STYLE_MIN_SIZE, SWIPE_STYLE_MAX_SIZE);
+    frame.r[0].y[1] = frame.r[0].y[0] + size;
     frame.r[1].y[1] = frame.r[0].y[1];
     frame.r[2].y[1] = frame.r[0].y[1];
     frame.r[3].y[1] = frame.r[0].y[1];
@@ -750,8 +788,8 @@ swipe_style_random_frame (void)
       gfloat x[6];
 
       x[0] = g_random_double_range (0, width);
-      x[1] = height * g_random_double_range (SWIPE_STYLE_MIN_RANGE,
-                                             SWIPE_STYLE_MAX_RANGE);
+      x[1] = height * zoom * g_random_double_range (SWIPE_STYLE_MIN_RANGE,
+                                                    SWIPE_STYLE_MAX_RANGE);
       x[1] = x[0] + (g_random_boolean () ? x[1] : -x[1]);
 
       if (g_random_boolean ())
@@ -781,6 +819,11 @@ swipe_style_random_frame (void)
       frame.r[3].x[1] = x[1];
     }
 
+    orient (frame.r + 0);
+    orient (frame.r + 1);
+    orient (frame.r + 2);
+    orient (frame.r + 3);
+
     frame.t[0] =     g_random_double_range (SWIPE_STYLE_MIN_CHANGE,
                                             SWIPE_STYLE_MAX_CHANGE);
     frame.t[1] = 1 - g_random_double_range (SWIPE_STYLE_MIN_CHANGE,
@@ -788,12 +831,16 @@ swipe_style_random_frame (void)
   }
   else
   {
-    frame.r[0].x[0] = g_random_double_range (-SWIPE_STYLE_MIN_SIZE * height, width);
+    size = height * zoom * g_random_double_range (SWIPE_STYLE_MIN_SIZE,
+                                                  SWIPE_STYLE_MAX_SIZE);
+
+    frame.r[0].x[0] = g_random_double_range (-0.5 * height * SWIPE_STYLE_MIN_SIZE,
+                                             width + 0.5 * height * SWIPE_STYLE_MIN_SIZE - size);
     frame.r[1].x[0] = frame.r[0].x[0];
     frame.r[2].x[0] = frame.r[0].x[0];
     frame.r[3].x[0] = frame.r[0].x[0];
 
-    frame.r[0].x[1] = frame.r[0].x[0] + g_random_double_range (SWIPE_STYLE_MIN_SIZE * height, SWIPE_STYLE_MAX_SIZE * height);
+    frame.r[0].x[1] = frame.r[0].x[0] + size;
     frame.r[1].x[1] = frame.r[0].x[1];
     frame.r[2].x[1] = frame.r[0].x[1];
     frame.r[3].x[1] = frame.r[0].x[1];
@@ -802,15 +849,17 @@ swipe_style_random_frame (void)
       gfloat y[6];
 
       y[0] = g_random_double_range (0, height);
-      y[1] = height * g_random_double_range (SWIPE_STYLE_MIN_RANGE,
-                                             SWIPE_STYLE_MAX_RANGE);
+      y[1] = height * zoom * g_random_double_range (SWIPE_STYLE_MIN_RANGE,
+                                                    SWIPE_STYLE_MAX_RANGE);
       y[1] = y[0] + (g_random_boolean () ? y[1] : -y[1]);
 
       if (g_random_boolean ())
         swap (y + 0, y + 1);
 
-      y[2] = g_random_double_range (0, SWIPE_STYLE_MAX_OFFSET);
-      y[3] = g_random_double_range (0, SWIPE_STYLE_MAX_OFFSET);
+      y[2] = g_random_double_range (SWIPE_STYLE_MIN_OFFSET,
+                                    SWIPE_STYLE_MAX_OFFSET);
+      y[3] = g_random_double_range (SWIPE_STYLE_MIN_OFFSET,
+                                    SWIPE_STYLE_MAX_OFFSET);
       y[2] = y[0] + y[2] * (y[1] - y[0]);
       y[3] = y[1] + y[3] * (y[0] - y[1]);
 
@@ -831,6 +880,11 @@ swipe_style_random_frame (void)
       frame.r[3].y[1] = y[1];
     }
 
+    orient (frame.r + 0);
+    orient (frame.r + 1);
+    orient (frame.r + 2);
+    orient (frame.r + 3);
+
     frame.t[0] =     g_random_double_range (SWIPE_STYLE_MIN_CHANGE,
                                             SWIPE_STYLE_MAX_CHANGE);
     frame.t[1] = 1 - g_random_double_range (SWIPE_STYLE_MIN_CHANGE,
@@ -844,10 +898,28 @@ swipe_style_random_frame (void)
 
 static Rectangle
 swipe_style_random_canvas (const Rectangle *extent,
-                           gint             w,
-                           gint             h)
+                           gint             cols,
+                           gint             rows,
+                           gfloat           zoom)
 {
-  return *extent;
+  Rectangle canvas = *extent;
+
+  gfloat dx     = get_width  (extent);
+  gfloat dy     = get_height (extent);
+  gfloat width  = (1.1 + zoom) * dx;
+  gfloat height = (1.1 + zoom) * dy;
+
+  if (width * rows < height * cols)
+    width = height * cols / rows;
+  else
+    height = width * rows / cols;
+
+  canvas.x[0] -= g_random_double_range (0, width  - dx);
+  canvas.y[0] -= g_random_double_range (0, height - dy);
+  canvas.x[1]  = canvas.x[0] + width;
+  canvas.y[1]  = canvas.y[0] + height;
+
+  return canvas;
 }
 
 
@@ -920,6 +992,17 @@ static gfloat
 get_height (const Rectangle *r)
 {
   return r->y[1] - r->y[0];
+}
+
+
+
+static void
+orient (Rectangle *r)
+{
+  if (r->x[0] > r->x[1])
+    swap (r->x + 0, r->x + 1);
+  if (r->y[0] > r->y[1])
+    swap (r->y + 0, r->y + 1);
 }
 
 
@@ -1109,19 +1192,19 @@ update_swatch (ClutterTimeline *timeline,
   gfloat     ratio  = clutter_timeline_get_progress (timeline);
   Rectangle  frame  = get_frame (&object->frame, ratio);
 
-  if (frame.x[0] > frame.x[1])
-    swap (frame.x + 0, frame.x + 1);
-  if (frame.y[0] > frame.y[1])
-    swap (frame.y + 0, frame.y + 1);
-
   if (object->actor != NULL)
   {
+    gfloat z0 = object->frame.z[0];
+    gfloat dz = object->frame.z[1] - z0;
+
     clutter_actor_set_position (object->actor,
                                 frame.x[0],
                                 frame.y[0]);
     clutter_actor_set_size     (object->actor,
                                 get_width  (&frame),
                                 get_height (&frame));
+    clutter_actor_set_depth    (object->actor,
+                                z0 + ratio * dz);
     clutter_actor_show         (object->actor);
   }
 }
@@ -1140,12 +1223,17 @@ update_memory (ClutterTimeline *timeline,
 
   if (object->swatch.actor != NULL)
   {
+    gfloat z0 = object->swatch.frame.z[0];
+    gfloat dz = object->swatch.frame.z[1] - z0;
+
     clutter_actor_set_position (object->swatch.actor,
                                 canvas.x[0],
                                 canvas.y[0]);
     clutter_actor_set_size     (object->swatch.actor,
                                 get_width  (&canvas),
                                 get_height (&canvas));
+    clutter_actor_set_depth    (object->swatch.actor,
+                                z0 + ratio * dz);
     clutter_actor_set_clip     (object->swatch.actor,
                                 frame.x[0] - canvas.x[0],
                                 frame.y[0] - canvas.y[0],
@@ -1166,7 +1254,13 @@ main (int   argc,
   clutter_init      (&argc, &argv);
   clutterrific_init (&argc, &argv);
 
-  file = clutterrific_list (g_get_user_special_dir (G_USER_DIRECTORY_PICTURES), "(?i)\\.(" EXTENSIONS ")$");
+  {
+    const gchar *dir = g_get_user_special_dir (G_USER_DIRECTORY_PICTURES);
+
+    file = clutterrific_list (dir, "(?i)\\.(" EXTENSIONS ")$");
+  }
+
+  cogl_set_depth_test_enabled (TRUE);
 
   SCHEME[0] = get_random_achromatic_colour;
   SCHEME[1] = get_random_monochromatic_colour;
