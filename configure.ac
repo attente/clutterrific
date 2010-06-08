@@ -7,6 +7,7 @@ AC_INIT([clutterrific],
         [http://attente.ca/])
 
 AC_CONFIG_SRCDIR([src/clutterrific.h])
+
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([src/config.h])
 
