@@ -68,7 +68,7 @@
 
 #define SWIPE_STYLE_MIN_ZOOM       0.1
 
-#define SWIPE_STYLE_MAX_ZOOM       0.3
+#define SWIPE_STYLE_MAX_ZOOM       0.2
 
 #define SWIPE_STYLE_MIN_CHANGE     0.2
 
@@ -272,8 +272,6 @@ static Rectangle    swipe_style_random_canvas       (const Rectangle  *extent,
 
 static void         swap                            (gfloat           *x,
                                                      gfloat           *y);
-
-static gdouble      get_delta                       (GTimeVal         *time);
 
 static gint         get_remaining_time              (ClutterTimeline  *timeline);
 
@@ -787,7 +785,8 @@ swipe_style_random_frame (gfloat zoom)
     {
       gfloat x[6];
 
-      x[0] = g_random_double_range (0, width);
+      x[0] = g_random_double_range (height * SWIPE_STYLE_MIN_RANGE,
+                                    width - height * SWIPE_STYLE_MIN_RANGE);
       x[1] = height * zoom * g_random_double_range (SWIPE_STYLE_MIN_RANGE,
                                                     SWIPE_STYLE_MAX_RANGE);
       x[1] = x[0] + (g_random_boolean () ? x[1] : -x[1]);
@@ -848,7 +847,8 @@ swipe_style_random_frame (gfloat zoom)
     {
       gfloat y[6];
 
-      y[0] = g_random_double_range (0, height);
+      y[0] = g_random_double_range (height * SWIPE_STYLE_MIN_RANGE,
+                                    height - height * SWIPE_STYLE_MIN_RANGE);
       y[1] = height * zoom * g_random_double_range (SWIPE_STYLE_MIN_RANGE,
                                                     SWIPE_STYLE_MAX_RANGE);
       y[1] = y[0] + (g_random_boolean () ? y[1] : -y[1]);
@@ -906,8 +906,8 @@ swipe_style_random_canvas (const Rectangle *extent,
 
   gfloat dx     = get_width  (extent);
   gfloat dy     = get_height (extent);
-  gfloat width  = (1.1 + zoom) * dx;
-  gfloat height = (1.1 + zoom) * dy;
+  gfloat width  = (1.01 + zoom) * dx;
+  gfloat height = (1.01 + zoom) * dy;
 
   if (width * rows < height * cols)
     width = height * cols / rows;
@@ -932,24 +932,6 @@ swap (gfloat *x,
 
   *x = *y;
   *y = t;
-}
-
-
-
-static gdouble
-get_delta (GTimeVal *time)
-{
-  GTimeVal now;
-  gdouble  dt = 0;
-
-  g_get_current_time (&now);
-
-  if (time->tv_sec)
-    dt = now.tv_sec - time->tv_sec + 1E-6 * (now.tv_usec - time->tv_usec);
-
-  *time = now;
-
-  return dt;
 }
 
 
@@ -1194,9 +1176,6 @@ update_swatch (ClutterTimeline *timeline,
 
   if (object->actor != NULL)
   {
-    gfloat z0 = object->frame.z[0];
-    gfloat dz = object->frame.z[1] - z0;
-
     clutter_actor_set_position (object->actor,
                                 frame.x[0],
                                 frame.y[0]);
@@ -1204,7 +1183,7 @@ update_swatch (ClutterTimeline *timeline,
                                 get_width  (&frame),
                                 get_height (&frame));
     clutter_actor_set_depth    (object->actor,
-                                z0 + ratio * dz);
+                                get_depth (&object->frame, ratio));
     clutter_actor_show         (object->actor);
   }
 }
@@ -1223,9 +1202,6 @@ update_memory (ClutterTimeline *timeline,
 
   if (object->swatch.actor != NULL)
   {
-    gfloat z0 = object->swatch.frame.z[0];
-    gfloat dz = object->swatch.frame.z[1] - z0;
-
     clutter_actor_set_position (object->swatch.actor,
                                 canvas.x[0],
                                 canvas.y[0]);
@@ -1233,7 +1209,7 @@ update_memory (ClutterTimeline *timeline,
                                 get_width  (&canvas),
                                 get_height (&canvas));
     clutter_actor_set_depth    (object->swatch.actor,
-                                z0 + ratio * dz);
+                                get_depth (&object->swatch.frame, ratio));
     clutter_actor_set_clip     (object->swatch.actor,
                                 frame.x[0] - canvas.x[0],
                                 frame.y[0] - canvas.y[0],
