@@ -18,6 +18,8 @@ PKG_CHECK_MODULES([CLUTTER], [clutter-1.0 >= 1.3])
 AC_SUBST([CLUTTER_CFLAGS])
 AC_SUBST([CLUTTER_LIBS])
 
+PKG_CHECK_MODULES([GNOME_SCREENSAVER], [gnome-screensaver >= 2.30])
+
 # checks for header files
 # checks for types
 # checks for structures
