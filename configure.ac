@@ -6,17 +6,17 @@ AC_INIT([clutterrific],
         [clutterrific],
         [http://attente.ca/])
 
-AC_CONFIG_SRCDIR([src/clutterrific.h])
-
 AM_INIT_AUTOMAKE
+
+AC_CONFIG_SRCDIR([src/clutterrific.h])
 AM_CONFIG_HEADER([src/config.h])
 
 AC_PROG_CC
 AC_PROG_INSTALL
 
 PKG_CHECK_MODULES([CLUTTER], [clutter-1.0 >= 1.3])
-AC_SUBST(CLUTTER_CFLAGS)
-AC_SUBST(CLUTTER_LIBS)
+AC_SUBST([CLUTTER_CFLAGS])
+AC_SUBST([CLUTTER_LIBS])
 
 # checks for header files
 # checks for types

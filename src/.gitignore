@@ -2,7 +2,8 @@
 .deps
 config.h
 config.h.in
-cube-twist
-glow-clock
+config.h.in~
+cube_twist
+glow_clock
 Makefile.in
 stamp-h1
