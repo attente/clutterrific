@@ -619,7 +619,7 @@ main (int   argc,
 
       if (j || k)
         tile[l][2] = clutter_clone_new (tile[i * 9][2]);
-      else if (file != NULL && FALSE)
+      else if (file != NULL)
       {
         gint try;
 
