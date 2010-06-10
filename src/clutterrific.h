@@ -25,8 +25,15 @@
 
 
 
-void clutterrific_init (int    *argc,
-                        char ***argv);
+#include <glib.h>
+
+
+
+void        clutterrific_init (int           *argc,
+                               char        ***argv);
+
+GPtrArray * clutterrific_list (const gchar   *path,
+                               const gchar   *pattern);
 
 
 

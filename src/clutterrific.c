@@ -27,6 +27,12 @@
 
 
 
+static void list (GPtrArray    *array,
+                  const gchar  *path,
+                  const GRegex *regex);
+
+
+
 void
 clutterrific_init (int    *argc,
                    char ***argv)
@@ -40,5 +46,57 @@ clutterrific_init (int    *argc,
 
     if (window && end != NULL && (!*end || *end == ' ') && (window < G_MAXULONG && errno != ERANGE))
       clutter_x11_set_stage_foreign (CLUTTER_STAGE (clutter_stage_get_default ()), window);
+  }
+}
+
+
+
+GPtrArray *
+clutterrific_list (const gchar *path,
+                   const gchar *pattern)
+{
+  GPtrArray *array = g_ptr_array_new_with_free_func (g_free);
+  GRegex    *regex = g_regex_new (pattern, G_REGEX_OPTIMIZE, 0, NULL);
+
+  list (array, path, regex);
+
+  g_regex_unref (regex);
+
+  return array;
+}
+
+
+
+static void
+list (GPtrArray    *array,
+      const gchar  *path,
+      const GRegex *regex)
+{
+  GDir *dir = g_dir_open (path, 0, NULL);
+
+  if (dir != NULL)
+  {
+    const gchar *name;
+
+    while ((name = g_dir_read_name (dir)) != NULL)
+    {
+      if (name[0] != '.')
+      {
+        gchar *file = g_build_filename (path, name, NULL);
+
+        if (g_file_test (file, G_FILE_TEST_IS_DIR))
+        {
+          list (array, file, regex);
+
+          g_free (file);
+        }
+        else if (g_regex_match (regex, file, 0, NULL))
+          g_ptr_array_add (array, file);
+        else
+          g_free (file);
+      }
+    }
+
+    g_dir_close (dir);
   }
 }
