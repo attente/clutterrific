@@ -1,9 +1,10 @@
+*.desktop
 *.o
 .deps
 config.h
 config.h.in
 config.h.in~
-cube_twist
-glow_clock
+cube-twist
+glow-clock
 Makefile.in
 stamp-h1
