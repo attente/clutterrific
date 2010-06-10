@@ -891,6 +891,9 @@ swipe_style_random_frame (gfloat zoom)
                                             SWIPE_STYLE_MAX_CHANGE);
   }
 
+  frame.z[0] = 0;
+  frame.z[1] = 0;
+
   return frame;
 }
 
