@@ -1,9 +1,9 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Cube Twister
+Name=Cube Twist
 Comment=Solves a 3x3x3 twisting cube.  Clutterrific!
-Exec=/usr/lib/gnome-screensaver/gnome-screensaver/cube-twist
-TryExec=/usr/lib/gnome-screensaver/gnome-screensaver/cube-twist
+Exec=@BINDIR@/cube-twist
+TryExec=@BINDIR@/cube-twist
 StartupNotify=false
 Terminal=false
 Type=Application

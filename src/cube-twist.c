@@ -47,12 +47,12 @@
 
 static const gchar *file[] =
 {
-  "/usr/lib/gnome-screensaver/gnome-screensaver/data/0.png",
-  "/usr/lib/gnome-screensaver/gnome-screensaver/data/1.png",
-  "/usr/lib/gnome-screensaver/gnome-screensaver/data/2.png",
-  "/usr/lib/gnome-screensaver/gnome-screensaver/data/3.png",
-  "/usr/lib/gnome-screensaver/gnome-screensaver/data/4.png",
-  "/usr/lib/gnome-screensaver/gnome-screensaver/data/5.png"
+  "cube-twist-data/0.png",
+  "cube-twist-data/1.png",
+  "cube-twist-data/2.png",
+  "cube-twist-data/3.png",
+  "cube-twist-data/4.png",
+  "cube-twist-data/5.png"
 };
 
 
