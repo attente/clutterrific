@@ -19,6 +19,10 @@ AC_SUBST([CLUTTER_CFLAGS])
 AC_SUBST([CLUTTER_LIBS])
 
 PKG_CHECK_MODULES([GNOME_SCREENSAVER], [gnome-screensaver >= 2.30])
+AC_SUBST([GNOME_SCREENSAVER_PRIVLIBEXECDIR],
+         [$(pkg-config --variable=privlibexecdir gnome-screensaver)])
+AC_SUBST([GNOME_SCREENSAVER_THEMESDIR],
+         [$(pkg-config --variable=themesdir gnome-screensaver)])
 
 # checks for header files
 # checks for types

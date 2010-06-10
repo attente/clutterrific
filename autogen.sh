@@ -2,6 +2,7 @@
 
 CRAP="aclocal.m4
       autom4te.cache
+      compile
       config.log
       config.status
       configure
@@ -14,11 +15,13 @@ CRAP="aclocal.m4
       src/.deps
       src/config.h
       src/config.h.in
+      src/config.h.in~
       src/Makefile
       src/Makefile.in
       src/stamp-h1"
 
 if [ "$1" = "clean" ]; then
+  make clean
   rm -rf ${CRAP}
   exit
 fi
