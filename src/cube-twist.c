@@ -20,40 +20,30 @@
 
 
 
+#define EXTENSIONS "jpg|png"
+
 /* cube upscale */
-#define SCALE        3
+#define SCALE         3
 
 /* intertile space */
-#define SPACE        0
+#define SPACE         0
 
 /* number of turns */
-#define MIN_TURNS   18
-#define MAX_TURNS   22
+#define MIN_TURNS    18
+#define MAX_TURNS    22
 
 /* non-turning moves */
-#define PRE_WAIT     1
-#define POST_WAIT    5
+#define PRE_WAIT      1
+#define POST_WAIT     5
 
 /* milliseconds per turn */
-#define PERIOD    1000
+#define PERIOD     1000
 
 
 
 #include <clutter/clutter.h>
 
 #include "clutterrific.h"
-
-
-
-static const gchar *file[] =
-{
-  "cube-twist-data/0.png",
-  "cube-twist-data/1.png",
-  "cube-twist-data/2.png",
-  "cube-twist-data/3.png",
-  "cube-twist-data/4.png",
-  "cube-twist-data/5.png"
-};
 
 
 
@@ -64,6 +54,8 @@ static gint          index[54];
 
 static ClutterActor *cube;
 static ClutterActor *tile[54][3];
+
+static GPtrArray    *file;
 
 
 
@@ -520,8 +512,8 @@ turn (ClutterTimeline *timeline,
   static gfloat previous = 2;
 
   gfloat progress = clutter_timeline_get_progress (timeline);
-  gfloat measure;
-  gfloat angle;
+  gfloat angle    = 0;
+  gfloat time;
 
   if (progress < previous)
   {
@@ -536,22 +528,22 @@ turn (ClutterTimeline *timeline,
   }
 
   if (progress < 0.5)
-    measure = 2 * progress * progress;
+    time = 2 * progress * progress;
   else
-    measure = 1 - 2 * (1 - progress) * (1 - progress);
+    time = 1 - 2 * (1 - progress) * (1 - progress);
 
   switch (move[moves - 1] % 3)
   {
     case 0:
-      angle =  90 * measure;
+      angle =  90 * time;
       break;
 
     case 1:
-      angle = 180 * measure;
+      angle = 180 * time;
       break;
 
     case 2:
-      angle = -90 * measure;
+      angle = -90 * time;
       break;
   }
 
@@ -577,6 +569,12 @@ main (int   argc,
 
   clutter_init      (&argc, &argv);
   clutterrific_init (&argc, &argv);
+
+  {
+    const gchar *dir = g_get_user_special_dir (G_USER_DIRECTORY_PICTURES);
+
+    file = clutterrific_list (dir, "(?i)\\.(" EXTENSIONS ")$");
+  }
 
   cogl_set_depth_test_enabled (TRUE);
 
@@ -617,7 +615,31 @@ main (int   argc,
 
       tile[l][0] = clutter_group_new ();
       tile[l][1] = clutter_group_new ();
-      tile[l][2] = clutter_texture_new_from_file (file[i], NULL);
+      tile[l][2] = NULL;
+
+      if (j || k)
+        tile[l][2] = clutter_clone_new (tile[i * 9][2]);
+      else if (file != NULL)
+      {
+        gint try;
+
+        for (try = 0; tile[l][2] == NULL && try < file->len; try++)
+        {
+          const gchar *path = file->pdata[g_random_int_range (0, file->len)];
+
+          tile[l][2] = clutter_texture_new_from_file (path, NULL);
+        }
+      }
+
+      if (tile[l][2] == NULL)
+      {
+        ClutterColor colour;
+
+        clutter_color_from_hls (&colour, (i * 60 + 0) % 360, 0.8, 1);
+
+        tile[l][2] = clutter_rectangle_new_with_color (&colour);
+      }
+
       clutter_actor_set_position  (tile[l][0], (k + 1) * SPACE,
                                                (j + 1) * SPACE);
       clutter_actor_set_depth     (tile[l][0], 90 + 4 * SPACE);
@@ -651,6 +673,8 @@ main (int   argc,
 
   if (moves)
     g_free (move);
+
+  g_ptr_array_unref (file);
 
   return 0;
 }
