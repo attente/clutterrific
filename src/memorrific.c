@@ -923,7 +923,7 @@ swipe_style_random_canvas (const Rectangle *extent,
   else
     h = w * rows / cols;
 
-  canvas.x[0] -= g_random_double_range (0, w  - dx);
+  canvas.x[0] -= g_random_double_range (0, w - dx);
   canvas.y[0] -= g_random_double_range (0, h - dy);
   canvas.x[1]  = canvas.x[0] + w;
   canvas.y[1]  = canvas.y[0] + h;
