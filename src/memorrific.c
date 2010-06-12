@@ -28,25 +28,25 @@
 
 #define MIN_THEME_TIME         20000
 
-#define MAX_THEME_TIME         30000
+#define MAX_THEME_TIME         40000
 
 #define STYLES                     1
 
-#define SWIPE_STYLE_SWATCHES       9
+#define SWIPE_STYLE_SWATCHES      32
 
-#define SWIPE_STYLE_MEMORIES       3
+#define SWIPE_STYLE_MEMORIES       8
 
-#define SWIPE_STYLE_MIN_TIME   25000
+#define SWIPE_STYLE_MIN_TIME   30000
 
-#define SWIPE_STYLE_MAX_TIME   35000
+#define SWIPE_STYLE_MAX_TIME   60000
 
-#define SWIPE_STYLE_MIN_WAIT    1000
+#define SWIPE_STYLE_MIN_WAIT    2000
 
-#define SWIPE_STYLE_MAX_WAIT    9000
+#define SWIPE_STYLE_MAX_WAIT   20000
 
-#define SWIPE_STYLE_MIN_LIFE    5000
+#define SWIPE_STYLE_MIN_LIFE    4000
 
-#define SWIPE_STYLE_MAX_LIFE    7000
+#define SWIPE_STYLE_MAX_LIFE    6000
 
 #define SWIPE_STYLE_SCALE_UP       1.0
 
@@ -68,7 +68,7 @@
 
 #define SWIPE_STYLE_MIN_ZOOM       0.2
 
-#define SWIPE_STYLE_MAX_ZOOM       0.2
+#define SWIPE_STYLE_MAX_ZOOM       0.4
 
 #define SWIPE_STYLE_MIN_CHANGE     0.2
 
@@ -199,6 +199,8 @@ static Style         STYLE[STYLES];
 
 static GPtrArray    *file;
 
+static gint          photo;
+
 
 
 static FineColour   get_random_achromatic_colour    (const FineColour *base,
@@ -272,6 +274,8 @@ static Rectangle    swipe_style_random_canvas       (const Rectangle  *extent,
 
 static void         swap                            (gfloat           *x,
                                                      gfloat           *y);
+
+static void         shuffle                         (GPtrArray        *array);
 
 static gint         get_remaining_time              (ClutterTimeline  *timeline);
 
@@ -628,9 +632,14 @@ swipe_style_create_memory (gint             wait,
 
       for (i = 0; i < file->len && memory->swatch.actor == NULL; i++)
       {
-        const gchar *path = file->pdata[g_random_int_range (0, file->len)];
+        memory->swatch.actor = clutter_texture_new_from_file (file->pdata[photo++], NULL);
 
-        memory->swatch.actor = clutter_texture_new_from_file (path, NULL);
+        if (photo >= file->len)
+        {
+          shuffle (file);
+
+          photo = 0;
+        }
       }
     }
 
@@ -915,8 +924,8 @@ swipe_style_random_canvas (const Rectangle *extent,
 
   dx = get_width  (&canvas);
   dy = get_height (&canvas);
-  w  = (1.01 + zoom) * dx;
-  h  = (1.01 + zoom) * dy;
+  w  = (1 + zoom) * dx;
+  h  = (1 + zoom) * dy;
 
   if (w * rows < h * cols)
     w = h * cols / rows;
@@ -941,6 +950,30 @@ swap (gfloat *x,
 
   *x = *y;
   *y = t;
+}
+
+
+
+static void
+shuffle (GPtrArray *array)
+{
+  if (array != NULL)
+  {
+    gint i, j;
+
+    for (i = 0; i < array->len; i++)
+    {
+      j = g_random_int_range (i, array->len);
+
+      if (i != j)
+      {
+        gpointer p = array->pdata[i];
+
+        array->pdata[i] = array->pdata[j];
+        array->pdata[j] = p;
+      }
+    }
+  }
 }
 
 
@@ -1137,10 +1170,14 @@ static void
 start_theme (ClutterTimeline *timeline,
              gpointer         data)
 {
+  gboolean started = FALSE;
+
   if (timeline != NULL)
     g_object_unref (timeline);
 
   timeline = clutter_timeline_new (g_random_int_range (MIN_THEME_TIME, MAX_THEME_TIME + 1));
+
+  if (!started) clutter_timeline_set_delay (timeline, 3000); started = TRUE;
 
   g_signal_connect       (timeline, "started",   G_CALLBACK (select_theme), NULL);
   g_signal_connect       (timeline, "new-frame", G_CALLBACK (update_theme), NULL);
@@ -1155,10 +1192,14 @@ static void
 start_style (ClutterTimeline *timeline,
              const Style     *style)
 {
+  gboolean started = FALSE;
+
   if (timeline != NULL)
     g_object_unref (timeline);
 
   timeline = clutter_timeline_new (g_random_int_range (style->min_time, style->max_time + 1));
+
+  if (!started) clutter_timeline_set_delay (timeline, 3000); started = TRUE;
 
   if (style->start != NULL)
     g_signal_connect (timeline, "started", style->start, NULL);
@@ -1276,7 +1317,10 @@ main (int   argc,
   {
     const gchar *dir = g_get_user_special_dir (G_USER_DIRECTORY_PICTURES);
 
-    file = clutterrific_list (dir, "(?i)\\.(" EXTENSIONS ")$");
+    file  = clutterrific_list (dir, "(?i)\\.(" EXTENSIONS ")$");
+    photo = 0;
+
+    shuffle (file);
   }
 
   cogl_set_depth_test_enabled (TRUE);
