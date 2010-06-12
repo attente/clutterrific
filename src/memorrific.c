@@ -36,9 +36,9 @@
 
 #define SWIPE_STYLE_MEMORIES       3
 
-#define SWIPE_STYLE_MIN_TIME   20000
+#define SWIPE_STYLE_MIN_TIME   25000
 
-#define SWIPE_STYLE_MAX_TIME   30000
+#define SWIPE_STYLE_MAX_TIME   35000
 
 #define SWIPE_STYLE_MIN_WAIT    2000
 
@@ -1229,6 +1229,40 @@ main (int   argc,
       char *argv[])
 {
   ClutterActor *stage;
+
+  {
+    guint32         seed    = g_random_int ();
+    GOptionEntry    entry[2];
+    GError         *error   = NULL;
+    GOptionContext *context = g_option_context_new ("memories, memories...");
+
+    entry[0].long_name       = "seed";
+    entry[0].short_name      = 's';
+    entry[0].flags           = 0;
+    entry[0].arg             = G_OPTION_ARG_INT;
+    entry[0].arg_data        = &seed;
+    entry[0].description     = "random seed";
+    entry[0].arg_description = "S";
+
+    entry[1].long_name       = NULL;
+    entry[1].short_name      = 0;
+    entry[1].flags           = 0;
+    entry[1].arg             = 0;
+    entry[1].arg_data        = NULL;
+    entry[1].description     = NULL;
+    entry[1].arg_description = NULL;
+
+    g_option_context_add_main_entries (context, entry, NULL);
+
+    if (!g_option_context_parse (context, &argc, &argv, &error))
+    {
+      g_print ("%s\n", error->message);
+
+      return 1;
+    }
+
+    g_random_set_seed (seed);
+  }
 
   clutter_init      (&argc, &argv);
   clutterrific_init (&argc, &argv);
