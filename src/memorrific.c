@@ -44,9 +44,9 @@
 
 #define SWIPE_STYLE_MAX_WAIT   20000
 
-#define SWIPE_STYLE_MIN_LIFE    4000
+#define SWIPE_STYLE_MIN_LIFE    5000
 
-#define SWIPE_STYLE_MAX_LIFE    6000
+#define SWIPE_STYLE_MAX_LIFE    7000
 
 #define SWIPE_STYLE_SCALE_UP       1.0
 
@@ -1170,14 +1170,10 @@ static void
 start_theme (ClutterTimeline *timeline,
              gpointer         data)
 {
-  gboolean started = FALSE;
-
   if (timeline != NULL)
     g_object_unref (timeline);
 
   timeline = clutter_timeline_new (g_random_int_range (MIN_THEME_TIME, MAX_THEME_TIME + 1));
-
-  if (!started) clutter_timeline_set_delay (timeline, 3000); started = TRUE;
 
   g_signal_connect       (timeline, "started",   G_CALLBACK (select_theme), NULL);
   g_signal_connect       (timeline, "new-frame", G_CALLBACK (update_theme), NULL);
@@ -1192,14 +1188,10 @@ static void
 start_style (ClutterTimeline *timeline,
              const Style     *style)
 {
-  gboolean started = FALSE;
-
   if (timeline != NULL)
     g_object_unref (timeline);
 
   timeline = clutter_timeline_new (g_random_int_range (style->min_time, style->max_time + 1));
-
-  if (!started) clutter_timeline_set_delay (timeline, 3000); started = TRUE;
 
   if (style->start != NULL)
     g_signal_connect (timeline, "started", style->start, NULL);
