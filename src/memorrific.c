@@ -40,11 +40,11 @@
 
 #define SWIPE_STYLE_MAX_TIME   35000
 
-#define SWIPE_STYLE_MIN_WAIT    2000
+#define SWIPE_STYLE_MIN_WAIT    1000
 
-#define SWIPE_STYLE_MAX_WAIT    6000
+#define SWIPE_STYLE_MAX_WAIT    9000
 
-#define SWIPE_STYLE_MIN_LIFE    3000
+#define SWIPE_STYLE_MIN_LIFE    5000
 
 #define SWIPE_STYLE_MAX_LIFE    7000
 
@@ -66,7 +66,7 @@
 
 #define SWIPE_STYLE_MAX_OFFSET     0.0
 
-#define SWIPE_STYLE_MIN_ZOOM       0.1
+#define SWIPE_STYLE_MIN_ZOOM       0.2
 
 #define SWIPE_STYLE_MAX_ZOOM       0.2
 
@@ -905,22 +905,28 @@ swipe_style_random_canvas (const Rectangle *extent,
                            gint             rows,
                            gfloat           zoom)
 {
+  gfloat    dx, dy, w, h;
   Rectangle canvas = *extent;
 
-  gfloat dx     = get_width  (extent);
-  gfloat dy     = get_height (extent);
-  gfloat width  = (1.01 + zoom) * dx;
-  gfloat height = (1.01 + zoom) * dy;
+  canvas.x[0] = CLAMP (canvas.x[0], 0, width);
+  canvas.x[1] = CLAMP (canvas.x[1], 0, width);
+  canvas.y[0] = CLAMP (canvas.y[0], 0, height);
+  canvas.y[1] = CLAMP (canvas.y[1], 0, height);
 
-  if (width * rows < height * cols)
-    width = height * cols / rows;
+  dx = get_width  (&canvas);
+  dy = get_height (&canvas);
+  w  = (1.01 + zoom) * dx;
+  h  = (1.01 + zoom) * dy;
+
+  if (w * rows < h * cols)
+    w = h * cols / rows;
   else
-    height = width * rows / cols;
+    h = w * rows / cols;
 
-  canvas.x[0] -= g_random_double_range (0, width  - dx);
-  canvas.y[0] -= g_random_double_range (0, height - dy);
-  canvas.x[1]  = canvas.x[0] + width;
-  canvas.y[1]  = canvas.y[0] + height;
+  canvas.x[0] -= g_random_double_range (0, w  - dx);
+  canvas.y[0] -= g_random_double_range (0, h - dy);
+  canvas.x[1]  = canvas.x[0] + w;
+  canvas.y[1]  = canvas.y[0] + h;
 
   return canvas;
 }
