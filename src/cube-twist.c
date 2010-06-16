@@ -47,15 +47,27 @@
 
 
 
+static gfloat        width;
+
+static gfloat        height;
+
 static gint         *move;
+
 static gint          moves;
+
 static gint          pivot[6];
+
 static gint          index[54];
 
+static ClutterActor *image[6];
+
 static ClutterActor *cube;
+
 static ClutterActor *tile[54][3];
 
 static GPtrArray    *file;
+
+static gint          photo;
 
 
 
@@ -63,11 +75,17 @@ static gint          pack      (gint             i,
                                 gint             j,
                                 gint             k);
 
+static void          shuffle   (GPtrArray       *array);
+
 static void          twist     (gint             move);
 
 static void          untwist   (gint             move);
 
-static void          shuffle   ();
+static void          import    (void);
+
+static void          arrange   (void);
+
+static void          jumble    (void);
 
 static gint          get_delta (gint             index,
                                 gint             where,
@@ -133,6 +151,30 @@ swap (gint turns,
       index[d] = w;
 
       break;
+  }
+}
+
+
+
+static void
+shuffle (GPtrArray *array)
+{
+  if (array != NULL)
+  {
+    gint i, j;
+
+    for (i = 0; i < array->len; i++)
+    {
+      j = g_random_int_range (i, array->len);
+
+      if (i != j)
+      {
+        gpointer p = array->pdata[i];
+
+        array->pdata[i] = array->pdata[j];
+        array->pdata[j] = p;
+      }
+    }
   }
 }
 
@@ -219,7 +261,101 @@ untwist (gint move)
 
 
 static void
-shuffle (void)
+import (void)
+{
+  ClutterActor *stage;
+  gint          i, j;
+
+  stage = clutter_stage_get_default ();
+
+  for (i = 0; i < 6; i++)
+  {
+    if (image[i] != NULL)
+    {
+      clutter_actor_destroy (image[i]);
+
+      image[i] = NULL;
+    }
+
+    for (j = 0; j < file->len && image[i] == NULL; j++)
+      image[i] = clutter_texture_new_from_file (file->pdata[(photo + j) % file->len], NULL);
+
+    photo = image[i] != NULL ? (photo + j + 1) % file->len : 0;
+
+    if (image[i] == NULL)
+    {
+      ClutterColor colour;
+
+      clutter_color_from_hls (&colour, 60 * i, 0.6, 1.0);
+
+      image[i] = clutter_rectangle_new_with_color (&colour);
+    }
+
+    if (image[i] != NULL)
+    {
+      clutter_actor_set_position (image[i], 2 * width, 2 * height);
+      clutter_actor_set_size     (image[i], 90, 90);
+    }
+
+    clutter_container_add_actor (CLUTTER_CONTAINER (stage), image[i]);
+  }
+}
+
+
+
+static void
+arrange (void)
+{
+  gint i, j, k, l;
+
+  if (cube == NULL)
+  {
+    cube = clutter_group_new ();
+
+    for (i = 0; i < 6; i++)
+    for (j = 0; j < 3; j++)
+    for (k = 0; k < 3; k++)
+    {
+      l = pack (i, j, k);
+
+      tile[l][0] = clutter_group_new ();
+      tile[l][1] = clutter_group_new ();
+      tile[l][2] = clutter_clone_new (image[i]);
+
+      clutter_actor_set_position  (tile[l][0], (k + 1) * SPACE, (j + 1) * SPACE);
+      clutter_actor_set_depth     (tile[l][0], 90 + 4 * SPACE);
+      clutter_actor_set_size      (tile[l][2], 90, 90);
+      clutter_actor_set_clip      (tile[l][2], k * 30, j * 30, 30, 30);
+      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][1]), tile[l][2]);
+      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][0]), tile[l][1]);
+      clutter_container_add_actor (CLUTTER_CONTAINER (cube),       tile[l][0]);
+    }
+
+    {
+      ClutterActor *stage = clutter_stage_get_default ();
+      gint          scale = SCALE * height / 480;
+      gint          size  = scale * (90 + 4 * SPACE);
+
+      clutter_actor_set_position  (cube, (width - size) / 2, (height - size) / 2);
+      clutter_actor_set_depth     (cube, -size);
+      clutter_actor_set_scale     (cube, scale, scale);
+      clutter_container_add_actor (CLUTTER_CONTAINER (stage), cube);
+      clutter_actor_show_all      (stage);
+    }
+  }
+  else
+  {
+    for (i = 0; i < 6; i++)
+    for (j = 0; j < 3; j++)
+    for (k = 0; k < 3; k++)
+      clutter_clone_set_source (CLUTTER_CLONE (tile[pack (i, j, k)][2]), image[i]);
+  }
+}
+
+
+
+static void
+jumble (void)
 {
   if (moves)
     g_free (move);
@@ -523,7 +659,10 @@ turn (ClutterTimeline *timeline,
     if (!moves)
     {
       g_free  (move);
-      shuffle ();
+
+      import  ();
+      arrange ();
+      jumble  ();
     }
   }
 
@@ -558,14 +697,11 @@ int
 main (int   argc,
       char *argv[])
 {
-  gfloat           width;
-  gfloat           height;
-  gfloat           period = PERIOD;
-
   ClutterActor    *stage;
   ClutterScore    *score;
   ClutterTimeline *timeline_spin;
   ClutterTimeline *timeline_turn;
+  gfloat           period = PERIOD;
 
   clutter_init      (&argc, &argv);
   clutterrific_init (&argc, &argv);
@@ -573,7 +709,10 @@ main (int   argc,
   {
     const gchar *dir = g_get_user_special_dir (G_USER_DIRECTORY_PICTURES);
 
-    file = clutterrific_list (dir, "(?i)\\.(" EXTENSIONS ")$");
+    file  = clutterrific_list (dir, "(?i)\\.(" EXTENSIONS ")$");
+    photo = 0;
+
+    shuffle (file);
   }
 
   cogl_set_depth_test_enabled (TRUE);
@@ -600,70 +739,6 @@ main (int   argc,
   clutter_score_append   (score, NULL, timeline_turn);
   clutter_score_set_loop (score, TRUE);
   clutter_score_start    (score);
-
-  /* create cube tiles */
-  cube = clutter_group_new ();
-
-  {
-    gint i, j, k, l;
-
-    for (i = 0; i < 6; i++)
-    for (j = 0; j < 3; j++)
-    for (k = 0; k < 3; k++)
-    {
-      l = pack (i, j, k);
-
-      tile[l][0] = clutter_group_new ();
-      tile[l][1] = clutter_group_new ();
-      tile[l][2] = NULL;
-
-      if (j || k)
-        tile[l][2] = clutter_clone_new (tile[i * 9][2]);
-      else if (file != NULL)
-      {
-        gint try;
-
-        for (try = 0; tile[l][2] == NULL && try < file->len; try++)
-        {
-          const gchar *path = file->pdata[g_random_int_range (0, file->len)];
-
-          tile[l][2] = clutter_texture_new_from_file (path, NULL);
-        }
-      }
-
-      if (tile[l][2] == NULL)
-      {
-        ClutterColor colour;
-
-        clutter_color_from_hls (&colour, (i * 60 + 0) % 360, 0.8, 1);
-
-        tile[l][2] = clutter_rectangle_new_with_color (&colour);
-      }
-
-      clutter_actor_set_position  (tile[l][0], (k + 1) * SPACE,
-                                               (j + 1) * SPACE);
-      clutter_actor_set_depth     (tile[l][0], 90 + 4 * SPACE);
-      clutter_actor_set_size      (tile[l][2], 90, 90);
-      clutter_actor_set_clip      (tile[l][2], k * 30, j * 30, 30, 30);
-      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][1]),
-                                                      tile[l][2]);
-      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][0]),
-                                                      tile[l][1]);
-      clutter_container_add_actor (CLUTTER_CONTAINER (cube), tile[l][0]);
-    }
-  }
-
-  {
-    gint scale = SCALE * height / 480;
-    gint size  = scale * (90 + 4 * SPACE);
-
-    clutter_actor_set_position  (cube, (width  - size) / 2,
-                                       (height - size) / 2);
-    clutter_actor_set_depth     (cube, -size);
-    clutter_actor_set_scale     (cube, scale, scale);
-    clutter_container_add_actor (CLUTTER_CONTAINER (stage), cube);
-    clutter_actor_show_all      (stage);
-  }
 
   clutter_main ();
 
