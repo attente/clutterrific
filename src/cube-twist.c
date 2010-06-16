@@ -372,9 +372,7 @@ jumble (void)
     }
   }
 
-  moves = POST_WAIT
-        + g_random_int_range (MIN_TURNS, MAX_TURNS + 1)
-        + PRE_WAIT;
+  moves = POST_WAIT + g_random_int_range (MIN_TURNS, MAX_TURNS + 1) + PRE_WAIT;
 
   if (moves < POST_WAIT + 1 + PRE_WAIT)
     moves = POST_WAIT + 1 + PRE_WAIT;
