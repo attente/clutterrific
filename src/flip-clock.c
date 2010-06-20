@@ -20,7 +20,7 @@
 
 
 
-#define FADE_DURATION  10.0
+#define FADE_DURATION   5.0
 
 #define FLIP_DURATION   0.2
 
@@ -663,9 +663,11 @@ update_fade (ClutterTimeline *timeline,
              gint             time,
              gpointer         data)
 {
-  ClutterColor black = { 0, 0, 0 };
+  gfloat       progress = clutter_timeline_get_progress (timeline);
+  gfloat       alpha    = 1 - progress;
+  ClutterColor black    = { 0, 0, 0 };
 
-  black.alpha = 255 * (1 - clutter_timeline_get_progress (timeline));
+  black.alpha = 255 * alpha;
 
   clutter_rectangle_set_color (CLUTTER_RECTANGLE (glass), &black);
 }
