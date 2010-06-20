@@ -20,7 +20,7 @@
 
 
 
-#define FADE_DURATION   2.0
+#define FADE_DURATION  10.0
 
 #define FLIP_DURATION   0.2
 
