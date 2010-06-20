@@ -1295,7 +1295,7 @@ main (int   argc,
 
     if (!g_option_context_parse (context, &argc, &argv, &error))
     {
-      g_print ("%s\n", error->message);
+      g_error ("%s\n", error->message);
 
       return 1;
     }

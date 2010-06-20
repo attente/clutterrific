@@ -16,6 +16,10 @@ AC_PROG_INSTALL
 
 AC_SUBST([LIBS], [-lm])
 
+PKG_CHECK_MODULES([RSVG], [librsvg-2.0 >= 2.26])
+AC_SUBST([RSVG_CFLAGS])
+AC_SUBST([RSVG_LIBS])
+
 PKG_CHECK_MODULES([CLUTTER], [clutter-1.0 >= 1.3])
 AC_SUBST([CLUTTER_CFLAGS])
 AC_SUBST([CLUTTER_LIBS])
@@ -33,5 +37,5 @@ AC_SUBST([GNOME_SCREENSAVER_THEMESDIR],
 # checks for library functions
 # checks for system services
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile data/Makefile src/Makefile])
 AC_OUTPUT

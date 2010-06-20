@@ -6,6 +6,8 @@ CRAP="aclocal.m4
       config.log
       config.status
       configure
+      data/Makefile
+      data/Makefile.in
       depcomp
       INSTALL
       install-sh
