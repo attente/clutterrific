@@ -325,7 +325,7 @@ import (void)
     w *= scale;
     h *= scale;
 
-    clutter_actor_set_depth     (panel, -1E-6);
+    clutter_actor_set_depth     (panel, -1E-3);
     clutter_actor_set_scale     (group, scale, scale);
     clutter_actor_set_position  (group, (width - w) / 2, (height - h) / 2);
     clutter_container_add_actor (CLUTTER_CONTAINER (group), panel);
@@ -555,7 +555,7 @@ start (ClutterTimeline *timeline,
 
         align (middle[i], above + i, below + i, 0);
 
-        clutter_actor_set_depth     (middle[i], 1E-6);
+        clutter_actor_set_depth     (middle[i], 1E-3);
         clutter_container_add_actor (CLUTTER_CONTAINER (group), middle[i]);
       }
 
