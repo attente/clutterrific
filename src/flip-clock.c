@@ -22,7 +22,7 @@
 
 #define FADE_DURATION   5.0
 
-#define FLIP_DURATION   0.2
+#define FLIP_DURATION   0.4
 
 #define GLASS_DEPTH   400.0
 
