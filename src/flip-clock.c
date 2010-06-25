@@ -722,8 +722,8 @@ main (int   argc,
 
   fade = clutter_timeline_new ((gint) (1000 * FADE_DURATION));
 
-  g_signal_connect (fade, "started",   G_CALLBACK (start_fade),   NULL);
-  g_signal_connect (fade, "new-frame", G_CALLBACK (update_fade),  NULL);
+  g_signal_connect (fade, "started",   G_CALLBACK (start_fade),  NULL);
+  g_signal_connect (fade, "new-frame", G_CALLBACK (update_fade), NULL);
   g_signal_connect (fade, "completed", G_CALLBACK (finish_fade), NULL);
 
   clutter_timeline_start (fade);
