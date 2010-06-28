@@ -105,8 +105,6 @@ static void     paint_pixel  (gfloat    x,
                               gfloat    h,
                               gfloat    l);
 
-static gdouble  get_delta    (void);
-
 static gint     get_width    (gunichar  c);
 
 static gint     get_height   (gunichar  c);
@@ -206,26 +204,6 @@ paint_pixel (gfloat x,
                                       0, 0, 1, 1);
 
   cogl_handle_unref (m);
-}
-
-
-
-static gdouble
-get_delta (void)
-{
-  static GTimeVal then = { 0 };
-
-  gdouble  dt = 0;
-  GTimeVal now;
-
-  g_get_current_time (&now);
-
-  if (then.tv_sec)
-    dt = now.tv_sec - then.tv_sec + 1E-6 * (now.tv_usec - then.tv_usec);
-
-  then = now;
-
-  return dt;
 }
 
 
@@ -894,7 +872,7 @@ paint_front (void)
 static void
 paint (void)
 {
-  gdouble dt = get_delta ();
+  gdouble dt = clutterrific_delta ();
 
   paint_back  ();
   paint_front ();

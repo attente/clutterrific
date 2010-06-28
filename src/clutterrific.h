@@ -32,6 +32,8 @@
 void        clutterrific_init    (int           *argc,
                                   char        ***argv);
 
+gdouble     clutterrific_delta   (void);
+
 GPtrArray * clutterrific_list    (const gchar   *path,
                                   const gchar   *pattern);
 

@@ -51,6 +51,26 @@ clutterrific_init (int    *argc,
 
 
 
+gdouble
+clutterrific_delta (void)
+{
+  static GTimeVal then = { 0 };
+
+  gfloat   dt = 0;
+  GTimeVal now;
+
+  g_get_current_time (&now);
+
+  if (then.tv_sec)
+    dt = now.tv_sec - then.tv_sec + 1E-6 * (now.tv_usec - then.tv_usec);
+
+  then = now;
+
+  return dt;
+}
+
+
+
 GPtrArray *
 clutterrific_list (const gchar *path,
                    const gchar *pattern)
