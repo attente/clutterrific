@@ -22,9 +22,13 @@
 
 #define EXTENSIONS    "jpg|png"
 
-#define FADE_DEPTH    400.0
+#define FADE_DEPTH      400.0
 
-#define FADE_DURATION   5.0
+#define FADE_DURATION     5.0
+
+#define GRAVITY       30000.0
+
+#define ITERATIONS       20
 
 
 
@@ -44,9 +48,20 @@ gfloat        width;
 
 gfloat        height;
 
+dWorldID      world;
+
 ClutterActor *stage;
 
 ClutterActor *glass;
+
+
+
+static void
+update_world (ClutterActor *actor,
+              gpointer      data)
+{
+  dWorldQuickStep (world, clutterrific_delta ());
+}
 
 
 
@@ -94,6 +109,11 @@ main (int   argc,
     clutterrific_shuffle (path);
   }
 
+  dInitODE ();
+  world = dWorldCreate ();
+  dWorldSetGravity (world, 0, GRAVITY, 0);
+  dWorldSetQuickStepNumIterations (world, ITERATIONS);
+
   {
     ClutterColor black = {   0,   0,   0, 255 };
     ClutterColor white = { 255, 255, 255, 255 };
@@ -121,7 +141,12 @@ main (int   argc,
     clutter_timeline_start (fade);
   }
 
+  g_signal_connect (stage, "paint", G_CALLBACK (update_world), NULL);
+
   clutter_main ();
+
+  dWorldDestroy (world);
+  dCloseODE ();
 
   return 0;
 }
