@@ -29,11 +29,13 @@
 
 
 
-void        clutterrific_init (int           *argc,
-                               char        ***argv);
+void        clutterrific_init    (int           *argc,
+                                  char        ***argv);
 
-GPtrArray * clutterrific_list (const gchar   *path,
-                               const gchar   *pattern);
+GPtrArray * clutterrific_list    (const gchar   *path,
+                                  const gchar   *pattern);
+
+void        clutterrific_shuffle (GPtrArray *array);
 
 
 

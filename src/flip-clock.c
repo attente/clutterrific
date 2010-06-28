@@ -20,11 +20,11 @@
 
 
 
+#define FADE_DEPTH    400.0
+
 #define FADE_DURATION   5.0
 
 #define FLIP_DURATION   0.4
-
-#define GLASS_DEPTH   400.0
 
 #define QUOTE(x)      #x
 
@@ -651,7 +651,7 @@ start_fade (ClutterTimeline *timeline,
 
   clutter_actor_set_position  (glass, -width, -height);
   clutter_actor_set_size      (glass, 3 * width, 3 * height);
-  clutter_actor_set_depth     (glass, GLASS_DEPTH);
+  clutter_actor_set_depth     (glass, FADE_DEPTH);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), glass);
 }

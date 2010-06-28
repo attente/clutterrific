@@ -67,6 +67,29 @@ clutterrific_list (const gchar *path,
 
 
 
+void
+clutterrific_shuffle (GPtrArray *array)
+{
+  if (array != NULL)
+  {
+    gint i, j;
+
+    for (i = 0; i < array->len; i++)
+    {
+      j = g_random_int_range (i, array->len);
+
+      if (i != j)
+      {
+        gpointer      p = array->pdata[i];
+        array->pdata[i] = array->pdata[j];
+        array->pdata[j] = p;
+      }
+    }
+  }
+}
+
+
+
 static void
 list (GPtrArray    *array,
       const gchar  *path,

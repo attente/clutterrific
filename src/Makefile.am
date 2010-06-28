@@ -1,11 +1,11 @@
-AM_CPPFLAGS = -DDATA_DIR='$(datadir)/clutterrific' $(CLUTTER_CFLAGS) $(RSVG_CFLAGS)
+AM_CPPFLAGS = -DDATA_DIR='$(datadir)/clutterrific' $(CLUTTER_CFLAGS) $(ODE_CFLAGS) $(RSVG_CFLAGS)
 AM_CFLAGS   = -ansi -pedantic -Wall
 
 bindir  = $(GNOME_SCREENSAVER_PRIVLIBEXECDIR)
 metadir = $(GNOME_SCREENSAVER_THEMESDIR)
 
-bin_PROGRAMS = cube-twist flip-clock glow-clock memorrific
-meta_DATA    = cube-twist.desktop flip-clock.desktop glow-clock.desktop memorrific.desktop
+bin_PROGRAMS = cube-twist flip-clock glow-clock memorrific photofall
+meta_DATA    = cube-twist.desktop flip-clock.desktop glow-clock.desktop memorrific.desktop photofall.desktop
 
 cube_twist_SOURCES = cube-twist.c clutterrific.c
 cube_twist_LDADD   = $(LIBS) $(CLUTTER_LIBS)
@@ -19,6 +19,9 @@ glow_clock_LDADD   = $(LIBS) $(CLUTTER_LIBS)
 memorrific_SOURCES = memorrific.c clutterrific.c
 memorrific_LDADD   = $(LIBS) $(CLUTTER_LIBS)
 
+photofall_SOURCES  = photofall.c clutterrific.c
+photofall_LDADD    = $(LIBS) $(CLUTTER_LIBS) $(ODE_LIBS)
+
 cube-twist.desktop: cube-twist.desktop.in
 	cat $^ | sed -e 's|[@]BINDIR[@]|$(bindir)|g' > $@
 
@@ -31,4 +34,7 @@ glow-clock.desktop: glow-clock.desktop.in
 memorrific.desktop: memorrific.desktop.in
 	cat $^ | sed -e 's|[@]BINDIR[@]|$(bindir)|g' > $@
 
-MOSTLYCLEANFILES = cube-twist.desktop flip-clock.desktop glow-clock.desktop memorrific.desktop
+photofall.desktop: photofall.desktop.in
+	cat $^ | sed -e 's|[@]BINDIR[@]|$(bindir)|g' > $@
+
+MOSTLYCLEANFILES = cube-twist.desktop flip-clock.desktop glow-clock.desktop memorrific.desktop photofall.desktop

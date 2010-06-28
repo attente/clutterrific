@@ -197,9 +197,9 @@ static gfloat        scheme_parameter;
 
 static Style         STYLE[STYLES];
 
-static GPtrArray    *file;
+static GPtrArray    *path;
 
-static gint          photo;
+static gint          file;
 
 
 
@@ -274,8 +274,6 @@ static Rectangle    swipe_style_random_canvas       (const Rectangle  *extent,
 
 static void         swap                            (gfloat           *x,
                                                      gfloat           *y);
-
-static void         shuffle                         (GPtrArray        *array);
 
 static gint         get_remaining_time              (ClutterTimeline  *timeline);
 
@@ -562,7 +560,7 @@ swipe_style_start (ClutterTimeline *timeline,
     swipe_style_create_swatch (wait, life, timeline);
   }
 
-  if (file != NULL && file->len)
+  if (path != NULL && path->len)
   {
     for (i = 0; i < SWIPE_STYLE_MEMORIES; i++)
     {
@@ -626,20 +624,16 @@ swipe_style_create_memory (gint             wait,
     memory->swatch.owner = timeline;
     memory->swatch.actor = NULL;
 
-    if (file != NULL)
+    if (path != NULL)
     {
       gint i;
 
-      for (i = 0; i < file->len && memory->swatch.actor == NULL; i++)
+      for (i = 0; i < path->len && memory->swatch.actor == NULL; i++)
       {
-        memory->swatch.actor = clutter_texture_new_from_file (file->pdata[photo++], NULL);
+        memory->swatch.actor = clutter_texture_new_from_file (path->pdata[file++], NULL);
 
-        if (photo >= file->len)
-        {
-          shuffle (file);
-
-          photo = 0;
-        }
+        if (file >= path->len)
+          file = 0;
       }
     }
 
@@ -950,30 +944,6 @@ swap (gfloat *x,
 
   *x = *y;
   *y = t;
-}
-
-
-
-static void
-shuffle (GPtrArray *array)
-{
-  if (array != NULL)
-  {
-    gint i, j;
-
-    for (i = 0; i < array->len; i++)
-    {
-      j = g_random_int_range (i, array->len);
-
-      if (i != j)
-      {
-        gpointer p = array->pdata[i];
-
-        array->pdata[i] = array->pdata[j];
-        array->pdata[j] = p;
-      }
-    }
-  }
 }
 
 
@@ -1309,10 +1279,10 @@ main (int   argc,
   {
     const gchar *dir = g_get_user_special_dir (G_USER_DIRECTORY_PICTURES);
 
-    file  = clutterrific_list (dir, "(?i)\\.(" EXTENSIONS ")$");
-    photo = 0;
+    path = clutterrific_list (dir, "(?i)\\.(" EXTENSIONS ")$");
+    file = 0;
 
-    shuffle (file);
+    clutterrific_shuffle (path);
   }
 
   cogl_set_depth_test_enabled (TRUE);
@@ -1353,7 +1323,7 @@ main (int   argc,
 
   clutter_main ();
 
-  g_ptr_array_unref (file);
+  g_ptr_array_unref (path);
 
   return 0;
 }
