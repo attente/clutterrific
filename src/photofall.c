@@ -30,6 +30,8 @@
 
 #define ITERATIONS       20
 
+#define SEGMENTS         20
+
 
 
 #include <ode/ode.h>
@@ -37,6 +39,28 @@
 #include <clutter/clutter.h>
 
 #include "clutterrific.h"
+
+
+
+typedef struct
+{
+  dBodyID outer[2];
+
+  dBodyID inner[SEGMENTS];
+}
+Rope;
+
+
+
+typedef struct
+{
+  dBodyID       body;
+
+  Rope          rope[2];
+
+  ClutterActor *actor;
+}
+Photo;
 
 
 
