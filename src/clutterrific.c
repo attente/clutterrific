@@ -27,6 +27,12 @@
 
 
 
+static gfloat width;
+
+static gfloat height;
+
+
+
 static void list (GPtrArray    *array,
                   const gchar  *path,
                   const GRegex *regex);
@@ -37,16 +43,84 @@ void
 clutterrific_init (int    *argc,
                    char ***argv)
 {
-  const gchar *id = g_getenv ("XSCREENSAVER_WINDOW");
-  gchar       *end;
+  const gchar  *id = g_getenv ("XSCREENSAVER_WINDOW");
+  ClutterActor *stage;
+  gchar        *end;
+
+  stage = clutter_stage_get_default ();
 
   if (id != NULL)
   {
     Window window = (Window) g_ascii_strtoull (id, &end, 0);
 
-    if (window && end != NULL && (!*end || *end == ' ') && (window < G_MAXULONG && errno != ERANGE))
-      clutter_x11_set_stage_foreign (CLUTTER_STAGE (clutter_stage_get_default ()), window);
+    if (window &&
+        end != NULL &&
+        (!*end || *end == ' ') &&
+        (window < G_MAXULONG && errno != ERANGE))
+      clutter_x11_set_stage_foreign (CLUTTER_STAGE (stage), window);
   }
+
+  clutter_actor_get_size (stage, &width, &height);
+}
+
+
+
+gfloat
+clutterrific_x (gfloat x)
+{
+  return x * width;
+}
+
+
+
+gfloat
+clutterrific_x_min (gfloat x)
+{
+  gfloat size = MIN (width, height);
+  gfloat zero = (width - size) / 2;
+
+  return zero + x * size;
+}
+
+
+
+gfloat
+clutterrific_x_max (gfloat x)
+{
+  gfloat size = MAX (width, height);
+  gfloat zero = (width - size) / 2;
+
+  return zero + x * size;
+}
+
+
+
+gfloat
+clutterrific_y (gfloat y)
+{
+  return y * height;
+}
+
+
+
+gfloat
+clutterrific_y_min (gfloat y)
+{
+  gfloat size = MIN (width, height);
+  gfloat zero = (height - size) / 2;
+
+  return zero + y * size;
+}
+
+
+
+gfloat
+clutterrific_y_max (gfloat y)
+{
+  gfloat size = MAX (width, height);
+  gfloat zero = (height - size) / 2;
+
+  return zero + y * size;
 }
 
 

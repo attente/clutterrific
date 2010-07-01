@@ -32,12 +32,20 @@
 void        clutterrific_init    (int           *argc,
                                   char        ***argv);
 
+gfloat      clutterrific_x       (gfloat         x);
+gfloat      clutterrific_x_min   (gfloat         x);
+gfloat      clutterrific_x_max   (gfloat         x);
+
+gfloat      clutterrific_y       (gfloat         y);
+gfloat      clutterrific_y_min   (gfloat         y);
+gfloat      clutterrific_y_max   (gfloat         y);
+
 gdouble     clutterrific_delta   (void);
 
 GPtrArray * clutterrific_list    (const gchar   *path,
                                   const gchar   *pattern);
 
-void        clutterrific_shuffle (GPtrArray *array);
+void        clutterrific_shuffle (GPtrArray     *array);
 
 
 

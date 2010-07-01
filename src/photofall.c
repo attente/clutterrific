@@ -26,9 +26,9 @@
 
 #define FADE_DURATION     5.0
 
-#define GRAVITY       30000.0
-
 #define ITERATIONS       20
+
+#define GRAVITY       30000.0
 
 #define SEGMENTS         20
 
@@ -72,6 +72,8 @@ gfloat        width;
 
 gfloat        height;
 
+gfloat        offset;
+
 dWorldID      world;
 
 ClutterActor *stage;
@@ -84,7 +86,11 @@ static void
 update_world (ClutterActor *actor,
               gpointer      data)
 {
-  dWorldQuickStep (world, clutterrific_delta ());
+  gdouble delta = clutterrific_delta ();
+
+  dWorldQuickStep (world, delta);
+
+  offset += delta * PAN;
 }
 
 
@@ -111,6 +117,8 @@ finish_fade (ClutterTimeline *timeline,
   clutter_actor_destroy (glass);
 
   g_object_unref (timeline);
+
+  g_signal_connect_after (stage, "paint", G_CALLBACK (update_world), NULL);
 }
 
 
@@ -132,6 +140,8 @@ main (int   argc,
 
     clutterrific_shuffle (path);
   }
+
+  offset = 0;
 
   dInitODE ();
   world = dWorldCreate ();
@@ -164,8 +174,6 @@ main (int   argc,
 
     clutter_timeline_start (fade);
   }
-
-  g_signal_connect (stage, "paint", G_CALLBACK (update_world), NULL);
 
   clutter_main ();
 
