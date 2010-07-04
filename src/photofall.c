@@ -221,7 +221,7 @@ create_photo (Photo *photo)
     gfloat l0 = l + g_random_double_range (-OFFSET, OFFSET);
     gfloat l1 = l + g_random_double_range (-OFFSET, OFFSET);
 
-    gfloat v0 = sqrt (l0 * l0 - h0 * h0 - d0 * d0) / (SEGMENTS - 1) / 2 * 8;
+    gfloat v0 = sqrt (l0 * l0 - h0 * h0 - d0 * d0) / (SEGMENTS - 1) / 2;
     gfloat v1 = sqrt (l1 * l1 - h1 * h1 - d1 * d1) / (SEGMENTS - 1) / 2;
 
     dMass mass;
@@ -348,7 +348,7 @@ poll_photo (gpointer data)
 
 
 
-/* XXX */
+/* begin XXX */
 static void
 draw_body (dBodyID body)
 {
@@ -361,16 +361,15 @@ draw_body (dBodyID body)
   y = y / s + (H - H / s) / 2;
 
   cogl_rectangle (x - 3, y - 3, x + 3, y + 3);
-
-  /* cogl_rectangle (p[0] * PPM - offset - 2, p[1] * PPM - 2, p[0] * PPM - offset + 2, p[1] * PPM + 2); */
 }
-/* XXX */
+
 static gboolean
 asdf (gpointer null)
 {
   clutter_actor_queue_redraw (stage);
   return TRUE;
 }
+/* end XXX */
 
 
 
@@ -481,7 +480,6 @@ main (int   argc,
   dInitODE ();
   world = dWorldCreate ();
   dWorldSetERP (world, ERP);
-  dWorldSetCFM (world, 0);
   dWorldSetGravity (world, 0, GRAVITY, 0);
   dWorldSetQuickStepNumIterations (world, ITERATIONS);
 
