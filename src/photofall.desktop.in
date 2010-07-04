@@ -1,7 +1,7 @@
 [Desktop Entry]
 Encoding=UTF-8
 Name=Photofall
-Comment=Like a waterfall, but with photos.  Clutterrific!
+Comment=Like a waterfall, but with photos.  Fine, you come up with a better name.  Clutterrific!
 Exec=@BINDIR@/photofall
 TryExec=@BINDIR@/photofall
 StartupNotify=false

@@ -32,13 +32,19 @@
 void        clutterrific_init    (int           *argc,
                                   char        ***argv);
 
-gfloat      clutterrific_x       (gfloat         x);
-gfloat      clutterrific_x_min   (gfloat         x);
-gfloat      clutterrific_x_max   (gfloat         x);
+gfloat      clutterrific_width   (void);
 
-gfloat      clutterrific_y       (gfloat         y);
-gfloat      clutterrific_y_min   (gfloat         y);
-gfloat      clutterrific_y_max   (gfloat         y);
+gfloat      clutterrific_height  (void);
+
+void        clutterrific_pack    (gfloat        *w,
+                                  gfloat        *h,
+                                  gfloat         w0,
+                                  gfloat         h0);
+
+void        clutterrific_wrap    (gfloat        *w,
+                                  gfloat        *h,
+                                  gfloat         w0,
+                                  gfloat         h0);
 
 gdouble     clutterrific_delta   (void);
 

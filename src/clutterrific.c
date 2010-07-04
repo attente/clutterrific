@@ -66,61 +66,41 @@ clutterrific_init (int    *argc,
 
 
 gfloat
-clutterrific_x (gfloat x)
+clutterrific_width (void)
 {
-  return x * width;
+  return width;
 }
 
 
 
 gfloat
-clutterrific_x_min (gfloat x)
+clutterrific_height (void)
 {
-  gfloat size = MIN (width, height);
-  gfloat zero = (width - size) / 2;
-
-  return zero + x * size;
+  return height;
 }
 
 
 
-gfloat
-clutterrific_x_max (gfloat x)
+void
+clutterrific_pack (gfloat *w,
+                   gfloat *h,
+                   gfloat  w0,
+                   gfloat  h0)
 {
-  gfloat size = MAX (width, height);
-  gfloat zero = (width - size) / 2;
-
-  return zero + x * size;
+  *w *= MIN (w0 / *w, h0 / *h);
+  *h *= MIN (w0 / *w, h0 / *h);
 }
 
 
 
-gfloat
-clutterrific_y (gfloat y)
+void
+clutterrific_wrap (gfloat *w,
+                   gfloat *h,
+                   gfloat  w0,
+                   gfloat  h0)
 {
-  return y * height;
-}
-
-
-
-gfloat
-clutterrific_y_min (gfloat y)
-{
-  gfloat size = MIN (width, height);
-  gfloat zero = (height - size) / 2;
-
-  return zero + y * size;
-}
-
-
-
-gfloat
-clutterrific_y_max (gfloat y)
-{
-  gfloat size = MAX (width, height);
-  gfloat zero = (height - size) / 2;
-
-  return zero + y * size;
+  *w *= MAX (w0 / *w, h0 / *h);
+  *h *= MAX (w0 / *w, h0 / *h);
 }
 
 
