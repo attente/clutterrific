@@ -381,7 +381,6 @@ update_world (ClutterActor *actor,
 
   offset += delta * W * PAN_SPEED;
 
-  /* XXX: dWorldQuickStep (world, delta); */
   dWorldQuickStep (world, 1);
 
   {
