@@ -40,9 +40,7 @@
 
 #define ITERATIONS        20
 
-/* g */
 #define GRAVITY            2E-3
-/* XXX: #define GRAVITY            9.8 */
 
 #define PAPER_DENSITY      1E+3
 
