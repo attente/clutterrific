@@ -509,6 +509,14 @@ main (int   argc,
 
   clutter_main ();
 
+  {
+    gint i;
+
+    for (i = 0; i < PHOTOS; i++)
+      if (photo[i].actor != NULL)
+        destroy_photo (photo + i);
+  }
+
   dWorldDestroy (world);
   dCloseODE ();
 
