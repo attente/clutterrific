@@ -24,6 +24,10 @@
 
 #define G    1E-3
 
+#define W    clutterrific_width  ()
+
+#define H    clutterrific_height ()
+
 
 
 #include <ode/ode.h>
@@ -34,12 +38,32 @@
 
 
 
+typedef struct
+{
+}
+Rope;
+
+
+
+typedef struct
+{
+  dBodyID       body;
+
+  ClutterActor *actor;
+
+  Rope          rope[2];
+}
+Photo;
+
+
+
 static dWorldID      world;
 
 static ClutterActor *stage;
 
 /* XXX */
 static dBodyID  body [5];
+static dJointGroupID group;
 static dJointID joint[5];
 /* XXX */
 
@@ -48,17 +72,29 @@ static dJointID joint[5];
 static gboolean
 update_world (gpointer data)
 {
-  dWorldQuickStep (world, 1);
-
   clutter_actor_queue_redraw (stage);
+
+  dWorldQuickStep (world, 1);
 
   return TRUE;
 }
 
+/* XXX */
 static void draw_body (dBodyID body) {
   const dReal *p = dBodyGetPosition (body);
   gfloat x = p[0] * 200 + 200;
   gfloat y = p[1] * 200;
+
+  cogl_rectangle (x - 2, y - 2, x + 2, y + 2);
+}
+
+static void draw_joint (dJointID joint) {
+  dVector3 p;
+  gfloat x;
+  gfloat y;
+  dJointGetBallAnchor (joint, p);
+  x = p[0] * 200 + 200;
+  y = p[1] * 200;
 
   cogl_rectangle (x - 2, y - 2, x + 2, y + 2);
 }
@@ -72,7 +108,14 @@ paint_world (void)
   draw_body (body[2]);
   draw_body (body[3]);
   draw_body (body[4]);
+  cogl_set_source_color4f (1, 0, 0, 1);
+  draw_joint (joint[0]);
+  draw_joint (joint[1]);
+  draw_joint (joint[2]);
+  draw_joint (joint[3]);
+  draw_joint (joint[4]);
 }
+/* XXX */
 
 
 
@@ -80,8 +123,6 @@ int
 main (int   argc,
       char *argv[])
 {
-  ClutterColor bg = { 255, 255, 255, 255 };
-
   dInitODE ();
   world = dWorldCreate ();
   dWorldSetGravity (world, 0, G, 0);
@@ -90,9 +131,13 @@ main (int   argc,
   clutterrific_init (&argc, &argv);
   cogl_set_depth_test_enabled (TRUE);
   stage = clutter_stage_get_default ();
-
-  clutter_stage_set_color (CLUTTER_STAGE (stage), &bg);
   clutter_actor_show_all (stage);
+
+  {
+    ClutterColor bg = { 255, 255, 255, 255 };
+
+    clutter_stage_set_color (CLUTTER_STAGE (stage), &bg);
+  }
 
   /* XXX */
   {
@@ -114,11 +159,12 @@ main (int   argc,
     dBodySetMass (body[3], &mass);
     dMassSetSphere (&mass, 5, 0.02);
     dBodySetMass (body[4], &mass);
-    joint[0] = dJointCreateBall (world, 0);
-    joint[1] = dJointCreateBall (world, 0);
-    joint[2] = dJointCreateBall (world, 0);
-    joint[3] = dJointCreateBall (world, 0);
-    joint[4] = dJointCreateBall (world, 0);
+    group = dJointGroupCreate (0);
+    joint[0] = dJointCreateBall (world, group);
+    joint[1] = dJointCreateBall (world, group);
+    joint[2] = dJointCreateBall (world, group);
+    joint[3] = dJointCreateBall (world, group);
+    joint[4] = dJointCreateBall (world, group);
     dJointAttach (joint[0], 0, body[0]);
     dJointAttach (joint[1], body[0], body[1]);
     dJointAttach (joint[2], body[1], body[2]);
