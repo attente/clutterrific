@@ -20,13 +20,19 @@
 
 
 
-#define STEP 1E-2
+#define ROPE  20
 
-#define G    1E-3
+#define STEP   1E-2
 
-#define W    clutterrific_width  ()
+#define G      1E-3
 
-#define H    clutterrific_height ()
+#define PPM    5E+3
+
+#define SPACE  6E-1
+
+#define W     clutterrific_width  ()
+
+#define H     clutterrific_height ()
 
 
 
@@ -40,6 +46,11 @@
 
 typedef struct
 {
+  dBodyID  body[ROPE];
+
+  dJointID nail;
+
+  dJointID glue[ROPE];
 }
 Rope;
 
@@ -56,6 +67,108 @@ typedef struct
 Photo;
 
 
+
+static void
+create_photo (Photo *photo)
+{
+  gfloat w;
+  gfloat h;
+
+  if (photo->body != NULL)
+    destroy_photo (photo);
+
+  if (file != NULL)
+  {
+    ClutterActor *image = NULL;
+    gint          i;
+
+    for (i = 0; image == NULL && i < file->len; i++)
+    {
+      image = clutter_texture_new_from_file (file->pdata[next++], NULL);
+
+      if (next >= file->len)
+        next = 0;
+    }
+
+    if (image == NULL)
+      return;
+
+    {
+      ClutterColor  c = { 224, 224, 224, 255 };
+      ClutterActor *group;
+      ClutterActor *paper;
+      gint          a;
+      gint          b;
+
+      photo->actor = clutter_group_new ();
+      group        = clutter_group_new ();
+      paper        = clutter_rectangle_new_with_color (&c);
+
+      clutter_texture_get_base_size (CLUTTER_TEXTURE (image), &a, &b);
+
+      w = a;
+      h = b;
+
+      clutterrific_pack (&w, &h, SPACE * MIN (W, H), SPACE * MIN (W, H));
+
+      clutter_actor_set_size      (paper, w + 4 * EDGE, h + 4 * EDGE);
+      clutter_actor_set_position  (image, 2 * EDGE, 2 * EDGE);
+      clutter_actor_set_size      (image, w, h);
+      clutter_container_add_actor (CLUTTER_CONTAINER (group), paper);
+      clutter_container_add_actor (CLUTTER_CONTAINER (group), image);
+      clutter_container_add_actor (CLUTTER_CONTAINER (photo->actor), group);
+    }
+  }
+}
+
+
+
+static void
+destroy_photo (Photo *photo)
+{
+  if (photo->body != NULL)
+  {
+    dBodyDestroy (photo->body);
+    photo->body = NULL;
+
+    clutter_actor_destroy (photo->actor);
+    photo->actor = NULL;
+
+    destroy_rope (photo->rope + 0);
+    destroy_rope (photo->rope + 1);
+  }
+}
+
+
+
+static void
+destroy_rope (Rope *rope)
+{
+  if (rope->nail != NULL)
+  {
+    gint i;
+
+    dJointDestroy (rope->nail);
+    rope->nail = NULL;
+
+    for (i = 0; i < ROPE; i++)
+    {
+      dBodyDestroy (rope->body[i]);
+      rope->body[i] = NULL;
+
+      dJointDestroy (rope->glue[i]);
+      rope->glue[i] = NULL;
+    }
+  }
+}
+
+
+
+static GPtrArray    *file;
+
+static gint          next;
+
+static gfloat        shift;
 
 static dWorldID      world;
 
@@ -123,6 +236,8 @@ int
 main (int   argc,
       char *argv[])
 {
+  shift = 0;
+
   dInitODE ();
   world = dWorldCreate ();
   dWorldSetGravity (world, 0, G, 0);
@@ -130,13 +245,21 @@ main (int   argc,
   clutter_init (&argc, &argv);
   clutterrific_init (&argc, &argv);
   cogl_set_depth_test_enabled (TRUE);
-  stage = clutter_stage_get_default ();
-  clutter_actor_show_all (stage);
+
+  {
+    const gchar *dir = g_get_user_special_dir (G_USER_DIRECTORY_PICTURES);
+
+    file = clutterrific_list (dir, "(?i)\\.(" EXTS ")$");
+    clutterrific_shuffle (file);
+    next = 0;
+  }
 
   {
     ClutterColor bg = { 255, 255, 255, 255 };
 
+    stage = clutter_stage_get_default ();
     clutter_stage_set_color (CLUTTER_STAGE (stage), &bg);
+    clutter_actor_show_all (stage);
   }
 
   /* XXX */
