@@ -173,7 +173,7 @@ create_photo (Photo *photo)
 
     photo->body = dBodyCreate (world);
     dBodySetPosition (photo->body, x / PPM, y1 / PPM, z / PPM);
-    dMassSetBox (&mass, 1E+3, w / PPM, h / PPM, 1E-1);
+    dMassSetBox (&mass, 1E+5, w / PPM, h / PPM, 1E-1);
     dBodySetMass (photo->body, &mass);
 
     {
