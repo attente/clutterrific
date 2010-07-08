@@ -42,21 +42,29 @@
 
 #define EXTS   "jpg|png"
 
-#define W      clutterrific_width  ()
-
-#define H      clutterrific_height ()
-
-#define U      MIN (W, H)
-
-#define V      MAX (W, H)
 
 
+#include <math.h>
 
 #include <ode/ode.h>
 
 #include <clutter/clutter.h>
 
 #include "clutterrific.h"
+
+
+
+#define DEG(x) (180 / M_PI * (x))
+
+#define RAD(x) (M_PI / 180 * (x))
+
+#define W clutterrific_width  ()
+
+#define H clutterrific_height ()
+
+#define U MIN (W, H)
+
+#define V MAX (W, H)
 
 
 
@@ -136,7 +144,7 @@ create_photo (Photo *photo)
       return;
 
     {
-      ClutterColor  c = { 224, 224, 224, 255 };
+      ClutterColor  c = { 240, 224, 192, 255 };
       ClutterActor *group;
       ClutterActor *paper;
       gint          a;
@@ -368,18 +376,60 @@ destroy_rope (Rope *rope)
 static void
 update_photo (Photo *photo)
 {
-  const dReal *p = dBodyGetPosition (photo->body);
+  if (photo->body != NULL)
+  {
+    ClutterActor *group = clutter_group_get_nth_child (CLUTTER_GROUP (photo->actor), 0);
 
-  gfloat x = p[0] * PPM;
-  gfloat y = p[1] * PPM;
-  gfloat z = p[2] * PPM;
+    const dReal *a = dBodyGetPosition (photo->body);
+    const dReal *b = dBodyGetPosition (photo->rope[0].body[ROPE - 1]);
+    const dReal *c = dBodyGetPosition (photo->rope[1].body[ROPE - 1]);
 
-  gfloat w;
-  gfloat h;
+    gfloat w = clutter_actor_get_width  (photo->actor);
+    gfloat h = clutter_actor_get_height (photo->actor);
 
-  clutter_actor_get_size (photo->actor, &w, &h);
+    gfloat ax = a[0] * PPM;
+    gfloat ay = a[1] * PPM;
+    gfloat az = a[2] * PPM;
 
-  clutter_actor_set_position (photo->actor, x - w / 2, y - h / 2);
+    gfloat bx = b[0] * PPM;
+    gfloat by = b[1] * PPM;
+    gfloat bz = b[2] * PPM;
+
+    gfloat cx = c[0] * PPM;
+    gfloat cy = c[1] * PPM;
+    gfloat cz = c[2] * PPM;
+
+    gfloat dx = ax - bx;
+    gfloat dy = ay - by;
+    gfloat dz = az - bz;
+
+    gfloat ex;
+    gfloat ey;
+    gfloat ez;
+
+    gfloat rx;
+    gfloat ry = asin ((bz - cz) / MAX (bz - cz, w - 2 * EDGE));
+    gfloat rz = atan2 (cy - by, cx - bx);
+
+    if (bx > cx)
+      ry = M_PI - ry;
+
+    ex = dx *  cos (rz) + dy * sin (rz);
+    ey = dx * -sin (rz) + dy * cos (rz);
+    ez = dz;
+
+    dx = ex * cos (ry) + ez * -sin (ry);
+    dy = ey;
+    dz = ex * sin (ry) + ez *  cos (ry);
+
+    rx = atan2 (dz, dy);
+
+    clutter_actor_set_position (photo->actor, bx - EDGE, by - EDGE);
+    clutter_actor_set_depth    (photo->actor, bz);
+    clutter_actor_set_rotation (photo->actor, CLUTTER_Y_AXIS, DEG (ry), EDGE, EDGE, 0);
+    clutter_actor_set_rotation (photo->actor, CLUTTER_Z_AXIS, DEG (rz), EDGE, EDGE, 0);
+    clutter_actor_set_rotation (group, CLUTTER_X_AXIS, DEG (rx), EDGE, EDGE, 0);
+  }
 }
 
 
@@ -389,7 +439,6 @@ update_world (gpointer data)
 {
   dWorldQuickStep (world, 1);
 
-  clutter_actor_queue_redraw (stage); /* XXX */
   update_photo (&photo); /* XXX */
 
   return TRUE;
