@@ -24,6 +24,12 @@
 
 #define ROPE   20
 
+#define ERP     4E-1
+
+#define CFM     1E-9
+
+#define DAMP    1E-2
+
 #define STEP    1E-2
 
 #define G       1E-4
@@ -183,44 +189,75 @@ create_photo (Photo *photo)
 
     photo->body = dBodyCreate (world);
     dBodySetPosition (photo->body, x / PPM, y / PPM, z / PPM);
-    dMassSetBox (&mass, 1E+4, w / PPM, h / PPM, 1E-2);
+    dMassSetBox (&mass, 1E+5, w / PPM, h / PPM, 1E-1);
     dBodySetMass (photo->body, &mass);
+    dBodySetLinearDamping (photo->body, DAMP);
+    dBodySetLinearDampingThreshold (photo->body, 0);
+    dBodySetAngularDamping (photo->body, DAMP);
+    dBodySetAngularDampingThreshold (photo->body, 0);
 
     {
       Rope *rope = photo->rope;
       gint  i;
 
+      dMassSetSphere (&mass, 1E+3, 1E-1);
+
       for (i = 0; i < ROPE / 2; i++)
       {
+        gfloat s = 1.0 * i / (ROPE - 1);
+        gfloat t = 2.0 * i / (ROPE - 1);
+
+        gfloat u0 = (x0 + (1 - s) * dx0) / PPM;
+        gfloat v0 = (y0 + (1 - s) * dy0) / PPM;
+        gfloat w0 = (z0 + dz0 + t * (l0 / 2 - dz0)) / PPM;
+        gfloat u1 = (x1 + (1 - s) * dx1) / PPM;
+        gfloat v1 = (y1 + (1 - s) * dy1) / PPM;
+        gfloat w1 = (z1 + dz1 + t * (l1 / 2 - dz1)) / PPM;
+
         rope[0].body[i] = dBodyCreate (world);
+        dBodySetPosition (rope[0].body[i], u0, v0, w0);
+        dBodySetMass (rope[0].body[i], &mass);
+        dBodySetLinearDamping (rope[0].body[i], DAMP);
+        dBodySetLinearDampingThreshold (rope[0].body[i], 0);
+        dBodySetAngularDamping (rope[0].body[i], DAMP);
+        dBodySetAngularDampingThreshold (rope[0].body[i], 0);
+
         rope[1].body[i] = dBodyCreate (world);
+        dBodySetPosition (rope[1].body[i], u1, v1, w1);
+        dBodySetMass (rope[1].body[i], &mass);
+        dBodySetLinearDamping (rope[1].body[i], DAMP);
+        dBodySetLinearDampingThreshold (rope[1].body[i], 0);
+        dBodySetAngularDamping (rope[1].body[i], DAMP);
+        dBodySetAngularDampingThreshold (rope[1].body[i], 0);
       }
 
       for (i = ROPE / 2; i < ROPE; i++)
       {
-        rope[0].body[i] = dBodyCreate (world);
-        rope[1].body[i] = dBodyCreate (world);
-      }
+        gfloat s = 1.0 * i / (ROPE - 1);
+        gfloat t = (i - ROPE / 2.0 + 0.5) / (ROPE / 2.0 - 0.5);
 
-      for (i = 0; i < ROPE; i++)
-      {
-        gfloat t  = (gfloat) i / (ROPE - 1);
-        gfloat u0 = (x0 + (1 - t) * dx0) / PPM;
-        gfloat v0 = (y1 + (1 - t) * dy0) / PPM;
-        gfloat w0 = (z + (1 - t) * dz0) / PPM;
-        gfloat u1 = (x1 + (1 - t) * dx1) / PPM;
-        gfloat v1 = (y1 + (1 - t) * dy1) / PPM;
-        gfloat w1 = (z + (1 - t) * dz1) / PPM;
+        gfloat u0 = (x0 + (1 - s) * dx0) / PPM;
+        gfloat v0 = (y0 + (1 - s) * dy0) / PPM;
+        gfloat w0 = (z0 + (1 - t) * l0 / 2) / PPM;
+        gfloat u1 = (x1 + (1 - s) * dx1) / PPM;
+        gfloat v1 = (y1 + (1 - s) * dy1) / PPM;
+        gfloat w1 = (z1 + (1 - t) * l1 / 2) / PPM;
 
         rope[0].body[i] = dBodyCreate (world);
         dBodySetPosition (rope[0].body[i], u0, v0, w0);
-        dMassSetSphere (&mass, 1E+3, 1E-1);
         dBodySetMass (rope[0].body[i], &mass);
+        dBodySetLinearDamping (rope[0].body[i], DAMP);
+        dBodySetLinearDampingThreshold (rope[0].body[i], 0);
+        dBodySetAngularDamping (rope[0].body[i], DAMP);
+        dBodySetAngularDampingThreshold (rope[0].body[i], 0);
 
         rope[1].body[i] = dBodyCreate (world);
         dBodySetPosition (rope[1].body[i], u1, v1, w1);
-        dMassSetSphere (&mass, 1E+3, 1E-1);
         dBodySetMass (rope[1].body[i], &mass);
+        dBodySetLinearDamping (rope[1].body[i], DAMP);
+        dBodySetLinearDampingThreshold (rope[1].body[i], 0);
+        dBodySetAngularDamping (rope[1].body[i], DAMP);
+        dBodySetAngularDampingThreshold (rope[1].body[i], 0);
       }
 
       rope[0].nail = dJointCreateBall (world, 0);
@@ -231,20 +268,43 @@ create_photo (Photo *photo)
       dJointAttach (rope[1].nail, 0, rope[1].body[0]);
       dJointAttach (rope[0].glue[ROPE - 1], rope[0].body[ROPE - 1], photo->body);
       dJointAttach (rope[1].glue[ROPE - 1], rope[1].body[ROPE - 1], photo->body);
-      dJointSetBallAnchor (rope[0].nail, (x0 + dx0) / PPM, (y1 + dy0) / PPM, (z + dz0) / PPM);
-      dJointSetBallAnchor (rope[1].nail, (x1 + dx1) / PPM, (y1 + dy1) / PPM, (z + dz1) / PPM);
-      dJointSetBallAnchor (rope[0].glue[ROPE - 1], x0 / PPM, y1 / PPM, z / PPM);
-      dJointSetBallAnchor (rope[1].glue[ROPE - 1], x1 / PPM, y1 / PPM, z / PPM);
+      dJointSetBallAnchor (rope[0].nail, (x0 + dx0) / PPM, (y0 + dy0) / PPM, (z0 + dz0) / PPM);
+      dJointSetBallAnchor (rope[1].nail, (x1 + dx1) / PPM, (y1 + dy1) / PPM, (z1 + dz1) / PPM);
+      dJointSetBallAnchor (rope[0].glue[ROPE - 1], x0 / PPM, y0 / PPM, z0 / PPM);
+      dJointSetBallAnchor (rope[1].glue[ROPE - 1], x1 / PPM, y1 / PPM, z1 / PPM);
 
-      for (i = 0; i + 1 < ROPE; i++)
+      for (i = 0; i < ROPE / 2; i++)
       {
-        gfloat t  = (i + 0.5) / (ROPE - 1);
-        gfloat u0 = (x0 + (1 - t) * dx0) / PPM;
-        gfloat v0 = (y1 + (1 - t) * dy0) / PPM;
-        gfloat w0 = (z + (1 - t) * dz0) / PPM;
-        gfloat u1 = (x1 + (1 - t) * dx1) / PPM;
-        gfloat v1 = (y1 + (1 - t) * dy1) / PPM;
-        gfloat w1 = (z + (1 - t) * dz1) / PPM;
+        gfloat s = (i + 0.5) / (ROPE - 1);
+        gfloat t = 2.0 * (i + 0.5) / (ROPE - 1);
+
+        gfloat u0 = (x0 + (1 - s) * dx0) / PPM;
+        gfloat v0 = (y0 + (1 - s) * dy0) / PPM;
+        gfloat w0 = (z0 + dz0 + t * (l0 / 2 - dz0)) / PPM;
+        gfloat u1 = (x1 + (1 - s) * dx1) / PPM;
+        gfloat v1 = (y1 + (1 - s) * dy1) / PPM;
+        gfloat w1 = (z1 + dz1 + t * (l1 / 2 - dz1)) / PPM;
+
+        rope[0].glue[i] = dJointCreateBall (world, 0);
+        dJointAttach (rope[0].glue[i], rope[0].body[i], rope[0].body[i + 1]);
+        dJointSetBallAnchor (rope[0].glue[i], u0, v0, w0);
+
+        rope[1].glue[i] = dJointCreateBall (world, 0);
+        dJointAttach (rope[1].glue[i], rope[1].body[i], rope[1].body[i + 1]);
+        dJointSetBallAnchor (rope[1].glue[i], u1, v1, w1);
+      }
+
+      for (i = ROPE / 2; i + 1 < ROPE; i++)
+      {
+        gfloat s = (i + 0.5) / (ROPE - 1);
+        gfloat t = (i + 1.0 - ROPE / 2.0) / (ROPE / 2.0 - 0.5);
+
+        gfloat u0 = (x0 + (1 - s) * dx0) / PPM;
+        gfloat v0 = (y0 + (1 - s) * dy0) / PPM;
+        gfloat w0 = (z0 + (1 - t) * l0 / 2) / PPM;
+        gfloat u1 = (x1 + (1 - s) * dx1) / PPM;
+        gfloat v1 = (y1 + (1 - s) * dy1) / PPM;
+        gfloat w1 = (z1 + (1 - t) * l1 / 2) / PPM;
 
         rope[0].glue[i] = dJointCreateBall (world, 0);
         dJointAttach (rope[0].glue[i], rope[0].body[i], rope[0].body[i + 1]);
@@ -317,18 +377,23 @@ update_world (gpointer data)
 static void
 paint_rect (gfloat x,
             gfloat y,
+            gfloat z,
             gfloat s,
             gfloat r,
             gfloat g,
-            gfloat b)
+            gfloat b,
+            gfloat a)
 {
-  gfloat c = 0.2; 
+  gfloat c = 1.0;
+
   x = (1 - c) * W / 2 + c * x;
   y = (1 - c) * H / 2 + c * y;
+  z = (1 - c) * W / 2 + c * z;
 
-  cogl_set_source_color4f (r, g, b, 1);
+  cogl_set_source_color4f (r, g, b, a);
 
-  cogl_rectangle (x - s, y - s, x + s, y + s);
+  cogl_rectangle (x - 200 - s, y - s, x - 200 + s, y + s);
+  cogl_rectangle (z + 200 - s, y - s, z + 200 + s, y + s);
 }
 
 
@@ -340,8 +405,9 @@ paint_body (dBodyID body)
 
   gfloat x = p[0] * PPM;
   gfloat y = p[1] * PPM;
+  gfloat z = p[2] * PPM;
 
-  paint_rect (x, y, 3, 0, 0, 1);
+  paint_rect (x, y, z, 3, 0, 0, 1, 1);
 }
 
 
@@ -353,13 +419,15 @@ paint_joint (dJointID joint)
 
   gfloat x;
   gfloat y;
+  gfloat z;
 
   dJointGetBallAnchor (joint, p);
 
   x = p[0] * PPM;
   y = p[1] * PPM;
+  z = p[2] * PPM;
 
-  paint_rect (x, y, 2, 1, 0, 0);
+  paint_rect (x, y, z, 2, 1, 0, 0, 1);
 }
 
 
@@ -393,6 +461,8 @@ main (int   argc,
 
   dInitODE ();
   world = dWorldCreate ();
+  dWorldSetCFM (world, CFM);
+  dWorldSetERP (world, ERP);
   dWorldSetGravity (world, 0, G, 0);
 
   clutter_init (&argc, &argv);
