@@ -32,7 +32,7 @@
 
 #define SPACE   6E-1
 
-#define EDGE    1E+1
+#define EDGE    5
 
 #define W      clutterrific_width  ()
 
@@ -156,29 +156,51 @@ create_photo (Photo *photo)
 
   {
     gfloat x = shift + 0.1 * U + 2 * EDGE + w / 2 + g_random_double_range (0, W);
-    gfloat y0 = -0.1 * U - 2 * EDGE - h / 2;
-    gfloat dy = g_random_double_range (2 * EDGE + h / 2, H - 2 * EDGE - h / 2) - y0;
-    gfloat y1 = y0 - dy;
+    gfloat y = -0.1 * U - 2 * EDGE - h / 2;
     gfloat z = 0.1 * U * g_random_double_range (-1, 1);
+
     gfloat x0 = x - w / 2 - EDGE;
+    gfloat y0 = y - h / 2 - EDGE;
+    gfloat z0 = z;
+
     gfloat x1 = x + w / 2 + EDGE;
+    gfloat y1 = y0;
+    gfloat z1 = z;
+
+    gfloat l = g_random_double_range (2 * EDGE + h / 2, H - 2 * EDGE - h / 2) - y0;
+    gfloat l0 = l + 0.1 * U * g_random_double_range (0, 1);
+    gfloat l1 = l + 0.1 * U * g_random_double_range (0, 1);
+
     gfloat dx0 = 0.1 * U * g_random_double_range (-1, 1);
-    gfloat dx1 = 0.1 * U * g_random_double_range (-1, 1);
-    gfloat dy0 = dy - 0.1 * U * g_random_double_range (0, 1);
-    gfloat dy1 = dy - 0.1 * U * g_random_double_range (0, 1);
+    gfloat dy0 = 0.1 * U * g_random_double_range (-1, 0);
     gfloat dz0 = 0.1 * U * g_random_double_range (-1, 1);
+
+    gfloat dx1 = 0.1 * U * g_random_double_range (-1, 1);
+    gfloat dy1 = 0.1 * U * g_random_double_range (-1, 0);
     gfloat dz1 = 0.1 * U * g_random_double_range (-1, 1);
 
     dMass mass;
 
     photo->body = dBodyCreate (world);
-    dBodySetPosition (photo->body, x / PPM, y1 / PPM, z / PPM);
-    dMassSetBox (&mass, 1E+5, w / PPM, h / PPM, 1E-1);
+    dBodySetPosition (photo->body, x / PPM, y / PPM, z / PPM);
+    dMassSetBox (&mass, 1E+4, w / PPM, h / PPM, 1E-2);
     dBodySetMass (photo->body, &mass);
 
     {
       Rope *rope = photo->rope;
       gint  i;
+
+      for (i = 0; i < ROPE / 2; i++)
+      {
+        rope[0].body[i] = dBodyCreate (world);
+        rope[1].body[i] = dBodyCreate (world);
+      }
+
+      for (i = ROPE / 2; i < ROPE; i++)
+      {
+        rope[0].body[i] = dBodyCreate (world);
+        rope[1].body[i] = dBodyCreate (world);
+      }
 
       for (i = 0; i < ROPE; i++)
       {
