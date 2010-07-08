@@ -87,8 +87,10 @@ clutterrific_pack (gfloat *w,
                    gfloat  w0,
                    gfloat  h0)
 {
-  *w *= MIN (w0 / *w, h0 / *h);
-  *h *= MIN (w0 / *w, h0 / *h);
+  gfloat s = MIN (w0 / *w, h0 / *h);
+
+  *w *= s;
+  *h *= s;
 }
 
 
@@ -99,8 +101,10 @@ clutterrific_wrap (gfloat *w,
                    gfloat  w0,
                    gfloat  h0)
 {
-  *w *= MAX (w0 / *w, h0 / *h);
-  *h *= MAX (w0 / *w, h0 / *h);
+  gfloat s = MAX (w0 / *w, h0 / *h);
+
+  *w *= s;
+  *h *= s;
 }
 
 

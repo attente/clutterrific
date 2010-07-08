@@ -156,10 +156,11 @@ create_photo (Photo *photo)
       clutter_actor_set_size      (paper, w + 4 * EDGE, h + 4 * EDGE);
       clutter_actor_set_position  (image, 2 * EDGE, 2 * EDGE);
       clutter_actor_set_size      (image, w, h);
+      clutter_actor_set_depth     (image, 1);
       clutter_container_add_actor (CLUTTER_CONTAINER (group), paper);
       clutter_container_add_actor (CLUTTER_CONTAINER (group), image);
       clutter_container_add_actor (CLUTTER_CONTAINER (photo->actor), group);
-      /* XXX clutter_container_add_actor (CLUTTER_CONTAINER (stage), photo->actor); */
+      clutter_container_add_actor (CLUTTER_CONTAINER (stage), photo->actor);
     }
   }
 
