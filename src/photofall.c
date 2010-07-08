@@ -24,6 +24,10 @@
 
 #define ROPE   10
 
+#define FADE    5
+
+#define POLL    2
+
 #define ERP     6E-1
 
 #define CFM     1E-9
@@ -35,6 +39,8 @@
 #define G       4E-4
 
 #define PPM     5E+3
+
+#define PAN     2E-2
 
 #define SPACE   6E-1
 
@@ -102,7 +108,9 @@ static dWorldID      world;
 
 static ClutterActor *stage;
 
-static Photo         photo; /* XXX */
+static ClutterActor *glass;
+
+static Photo         photo[PHOTOS];
 
 
 
@@ -411,6 +419,13 @@ update_photo (Photo *photo)
     gfloat ry = asin ((bz - cz) / MAX (bz - cz, w - 2 * EDGE));
     gfloat rz = atan2 (cy - by, cx - bx);
 
+    if (ax + w + h < shift)
+    {
+      destroy_photo (photo);
+
+      return;
+    }
+
     if (bx > cx)
       ry = M_PI - ry;
 
@@ -424,7 +439,7 @@ update_photo (Photo *photo)
 
     rx = atan2 (dz, dy);
 
-    clutter_actor_set_position (photo->actor, bx - EDGE, by - EDGE);
+    clutter_actor_set_position (photo->actor, bx - EDGE - shift, by - EDGE);
     clutter_actor_set_depth    (photo->actor, bz);
     clutter_actor_set_rotation (photo->actor, CLUTTER_Y_AXIS, DEG (ry), EDGE, EDGE, 0);
     clutter_actor_set_rotation (photo->actor, CLUTTER_Z_AXIS, DEG (rz), EDGE, EDGE, 0);
@@ -434,14 +449,87 @@ update_photo (Photo *photo)
 
 
 
+static void
+paint_rope (Rope *rope)
+{
+}
+
+
+
 static gboolean
 update_world (gpointer data)
 {
+  gdouble dt = clutterrific_delta ();
+  gint    i;
+
+  shift += dt * PAN * PPM;
+
   dWorldQuickStep (world, 1);
 
-  update_photo (&photo); /* XXX */
+  for (i = 0; i < PHOTOS; i++)
+    if (photo[i].body != NULL)
+      update_photo (photo + i);
+
+  for (i = 0; i < PHOTOS; i++)
+  {
+    if (photo[i].body != NULL)
+    {
+      paint_rope (photo[i].rope + 0);
+      paint_rope (photo[i].rope + 1);
+    }
+  }
+
+  clutter_actor_queue_redraw (stage);
 
   return TRUE;
+}
+
+
+
+static gboolean
+poll_photo (gpointer data)
+{
+  gint i;
+
+  for (i = 0; i < PHOTOS; i++)
+  {
+    if (photo[i].body == NULL)
+    {
+      create_photo (photo + i);
+
+      break;
+    }
+  }
+
+  return TRUE;
+}
+
+
+
+static void
+update_fade (ClutterTimeline *timeline,
+             gint             time,
+             gpointer         data)
+{
+  gfloat       alpha = clutter_timeline_get_progress (timeline);
+  ClutterColor black = { 0, 0, 0 };
+
+  black.alpha = 255 * (1 - alpha);
+
+  clutter_rectangle_set_color (CLUTTER_RECTANGLE (glass), &black);
+}
+
+
+
+static void
+finish_fade (ClutterTimeline *timeline,
+             gpointer         data)
+{
+  clutter_actor_destroy (glass);
+
+  g_object_unref (timeline);
+
+  g_timeout_add ((gint) 1000 * POLL, poll_photo, NULL);
 }
 
 
@@ -458,6 +546,8 @@ paint_rect (gfloat x,
             gfloat a)
 {
   gfloat c = 1.0;
+
+  x -= shift;
 
   x = (1 - c) * W / 2 + c * x;
   y = (1 - c) * H / 2 + c * y;
@@ -505,21 +595,34 @@ paint_joint (dJointID joint)
 
 
 static void
+paint_photo (Photo *photo)
+{
+  gint i;
+
+  update_photo (photo);
+
+  paint_joint (photo->rope[0].nail);
+  paint_joint (photo->rope[1].nail);
+
+  for (i = 0; i < ROPE; i++)
+  {
+    paint_body (photo->rope[0].body[i]);
+    paint_body (photo->rope[1].body[i]);
+    paint_joint (photo->rope[0].glue[i]);
+    paint_joint (photo->rope[1].glue[i]);
+  }
+}
+
+
+
+static void
 paint_world (void)
 {
   gint i;
 
-  paint_body (photo.body);
-  paint_joint (photo.rope[0].nail);
-  paint_joint (photo.rope[1].nail);
-
-  for (i = 0; i < ROPE; i++)
-  {
-    paint_body (photo.rope[0].body[i]);
-    paint_body (photo.rope[1].body[i]);
-    paint_joint (photo.rope[0].glue[i]);
-    paint_joint (photo.rope[1].glue[i]);
-  }
+  for (i = 0; i < PHOTOS; i++)
+    if (photo[i].body != NULL)
+      paint_photo (photo + i);
 }
 /* XXX */
 
@@ -560,7 +663,21 @@ main (int   argc,
   g_timeout_add ((guint) (1000 * STEP), update_world, NULL);
   g_signal_connect_after (stage, "paint", paint_world, NULL);
 
-  create_photo (&photo);
+  {
+    ClutterTimeline *fade  = clutter_timeline_new ((gint) (1000 * FADE));
+    ClutterColor     black = { 0, 0, 0, 255 };
+
+    glass = clutter_rectangle_new_with_color (&black);
+    clutter_actor_set_position  (glass, -W, -H);
+    clutter_actor_set_depth     (glass, 400);
+    clutter_actor_set_size      (glass, 3 * W, 3 * H);
+    clutter_container_add_actor (CLUTTER_CONTAINER (stage), glass);
+
+    g_signal_connect (fade, "new-frame", G_CALLBACK (update_fade), NULL);
+    g_signal_connect (fade, "completed", G_CALLBACK (finish_fade), NULL);
+
+    clutter_timeline_start (fade);
+  }
 
   clutter_main ();
 
