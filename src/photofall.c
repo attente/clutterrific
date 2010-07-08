@@ -20,25 +20,27 @@
 
 
 
-#define EXTS   "jpg|png"
+#define PHOTOS 10
 
-#define ROPE   20
+#define ROPE   10
 
-#define ERP     4E-1
+#define ERP     6E-1
 
 #define CFM     1E-9
 
-#define DAMP    1E-2
+#define DAMP    4E-2
 
 #define STEP    1E-2
 
-#define G       1E-4
+#define G       4E-4
 
 #define PPM     5E+3
 
 #define SPACE   6E-1
 
 #define EDGE    5
+
+#define EXTS   "jpg|png"
 
 #define W      clutterrific_width  ()
 
@@ -92,7 +94,7 @@ static dWorldID      world;
 
 static ClutterActor *stage;
 
-static Photo photo; /* XXX */
+static Photo         photo; /* XXX */
 
 
 
@@ -157,6 +159,7 @@ create_photo (Photo *photo)
       clutter_container_add_actor (CLUTTER_CONTAINER (group), paper);
       clutter_container_add_actor (CLUTTER_CONTAINER (group), image);
       clutter_container_add_actor (CLUTTER_CONTAINER (photo->actor), group);
+      /* XXX clutter_container_add_actor (CLUTTER_CONTAINER (stage), photo->actor); */
     }
   }
 
@@ -361,12 +364,32 @@ destroy_rope (Rope *rope)
 
 
 
+static void
+update_photo (Photo *photo)
+{
+  const dReal *p = dBodyGetPosition (photo->body);
+
+  gfloat x = p[0] * PPM;
+  gfloat y = p[1] * PPM;
+  gfloat z = p[2] * PPM;
+
+  gfloat w;
+  gfloat h;
+
+  clutter_actor_get_size (photo->actor, &w, &h);
+
+  clutter_actor_set_position (photo->actor, x - w / 2, y - h / 2);
+}
+
+
+
 static gboolean
 update_world (gpointer data)
 {
-  clutter_actor_queue_redraw (stage); /* XXX */
-
   dWorldQuickStep (world, 1);
+
+  clutter_actor_queue_redraw (stage); /* XXX */
+  update_photo (&photo); /* XXX */
 
   return TRUE;
 }
@@ -392,8 +415,7 @@ paint_rect (gfloat x,
 
   cogl_set_source_color4f (r, g, b, a);
 
-  cogl_rectangle (x - 200 - s, y - s, x - 200 + s, y + s);
-  cogl_rectangle (z + 200 - s, y - s, z + 200 + s, y + s);
+  cogl_rectangle (x - s, y - s, x + s, y + s);
 }
 
 
