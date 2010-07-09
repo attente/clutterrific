@@ -24,6 +24,10 @@
 
 #define ROPE   10
 
+#define CURVE   4
+
+#define THICK   1.5
+
 #define FADE    5
 
 #define POLL    2
@@ -114,13 +118,28 @@ static Photo         photo[PHOTOS];
 
 
 
-static void     create_photo  (Photo    *photo);
+static void     create_photo  (Photo           *photo);
 
-static void     destroy_photo (Photo    *photo);
+static void     destroy_photo (Photo           *photo);
 
-static void     destroy_rope  (Rope     *rope);
+static void     destroy_rope  (Rope            *rope);
 
-static gboolean update_world  (gpointer  data);
+static void     update_photo  (Photo           *photo);
+
+static void     paint_rope    (Rope            *rope);
+
+static void     paint_ropes   (void);
+
+static gboolean update_world  (gpointer         data);
+
+static gboolean poll_photo    (gpointer         data);
+
+static void     update_fade   (ClutterTimeline *timeline,
+                               gint             time,
+                               gpointer         data);
+
+static void     finish_fade   (ClutterTimeline *timeline,
+                               gpointer         data);
 
 
 
@@ -452,6 +471,80 @@ update_photo (Photo *photo)
 static void
 paint_rope (Rope *rope)
 {
+  gint   points = 1 + (ROPE - 1) * CURVE;
+  gfloat data[3 * 2 * (1 + (ROPE - 1) * CURVE)];
+  gint   i, j;
+
+  for (i = 0; i + 1 < ROPE; i++)
+  {
+    dVector3     a, b, c;
+    const dReal *d = dBodyGetPosition (rope->body[i]);
+    const dReal *e = dBodyGetPosition (rope->body[i + 1]);
+
+    dJointGetBallAnchor (rope->glue[i], b);
+
+    a[0] = d[0] * PPM - shift;
+    a[1] = d[1] * PPM;
+    a[2] = d[2] * PPM;
+    b[0] = b[0] * PPM - shift;
+    b[1] = b[1] * PPM;
+    b[2] = b[2] * PPM;
+    c[0] = e[0] * PPM - shift;
+    c[1] = e[1] * PPM;
+    c[2] = e[2] * PPM;
+
+    for (j = 0; j < CURVE + (i + 1 == ROPE - 1); j++)
+    {
+      gfloat  t = (gfloat) j / CURVE;
+      gfloat  s = 1 - t;
+
+      gfloat *u = data + 3 * 2 * (CURVE * i + j);
+      gfloat *v = u + 3;
+      gfloat  w[3];
+
+      w[0] = s * s * a[0] + 2 * s * t * b[0] + t * t * c[0];
+      w[1] = s * s * a[1] + 2 * s * t * b[1] + t * t * c[1];
+      w[2] = s * s * a[2] + 2 * s * t * b[2] + t * t * c[2];
+
+      u[0] = w[0] - THICK;
+      u[1] = w[1];
+      u[2] = w[2];
+
+      v[0] = w[0] + THICK;
+      v[1] = w[1];
+      v[2] = w[2];
+    }
+  }
+
+  {
+    CoglHandle        buffer = cogl_vertex_buffer_new (2 * points);
+    CoglVerticesMode  mode   = COGL_VERTICES_MODE_TRIANGLE_STRIP;
+    CoglAttributeType type   = COGL_ATTRIBUTE_TYPE_FLOAT;
+
+    cogl_vertex_buffer_add  (buffer, "gl_Vertex", 3, type, TRUE, 12, data);
+    cogl_vertex_buffer_draw (buffer, mode, 0, 2 * points);
+
+    cogl_handle_unref (buffer);
+  }
+}
+
+
+
+static void
+paint_ropes (void)
+{
+  gint i;
+
+  cogl_set_source_color4f (0.2, 0.2, 0.4, 1.0);
+
+  for (i = 0; i < PHOTOS; i++)
+  {
+    if (photo[i].body != NULL)
+    {
+      paint_rope (photo[i].rope + 0);
+      paint_rope (photo[i].rope + 1);
+    }
+  }
 }
 
 
@@ -469,15 +562,6 @@ update_world (gpointer data)
   for (i = 0; i < PHOTOS; i++)
     if (photo[i].body != NULL)
       update_photo (photo + i);
-
-  for (i = 0; i < PHOTOS; i++)
-  {
-    if (photo[i].body != NULL)
-    {
-      paint_rope (photo[i].rope + 0);
-      paint_rope (photo[i].rope + 1);
-    }
-  }
 
   clutter_actor_queue_redraw (stage);
 
@@ -534,100 +618,6 @@ finish_fade (ClutterTimeline *timeline,
 
 
 
-/* XXX */
-static void
-paint_rect (gfloat x,
-            gfloat y,
-            gfloat z,
-            gfloat s,
-            gfloat r,
-            gfloat g,
-            gfloat b,
-            gfloat a)
-{
-  gfloat c = 1.0;
-
-  x -= shift;
-
-  x = (1 - c) * W / 2 + c * x;
-  y = (1 - c) * H / 2 + c * y;
-  z = (1 - c) * W / 2 + c * z;
-
-  cogl_set_source_color4f (r, g, b, a);
-
-  cogl_rectangle (x - s, y - s, x + s, y + s);
-}
-
-
-
-static void
-paint_body (dBodyID body)
-{
-  const dReal *p = dBodyGetPosition (body);
-
-  gfloat x = p[0] * PPM;
-  gfloat y = p[1] * PPM;
-  gfloat z = p[2] * PPM;
-
-  paint_rect (x, y, z, 3, 0, 0, 1, 1);
-}
-
-
-
-static void
-paint_joint (dJointID joint)
-{
-  dVector3 p;
-
-  gfloat x;
-  gfloat y;
-  gfloat z;
-
-  dJointGetBallAnchor (joint, p);
-
-  x = p[0] * PPM;
-  y = p[1] * PPM;
-  z = p[2] * PPM;
-
-  paint_rect (x, y, z, 2, 1, 0, 0, 1);
-}
-
-
-
-static void
-paint_photo (Photo *photo)
-{
-  gint i;
-
-  update_photo (photo);
-
-  paint_joint (photo->rope[0].nail);
-  paint_joint (photo->rope[1].nail);
-
-  for (i = 0; i < ROPE; i++)
-  {
-    paint_body (photo->rope[0].body[i]);
-    paint_body (photo->rope[1].body[i]);
-    paint_joint (photo->rope[0].glue[i]);
-    paint_joint (photo->rope[1].glue[i]);
-  }
-}
-
-
-
-static void
-paint_world (void)
-{
-  gint i;
-
-  for (i = 0; i < PHOTOS; i++)
-    if (photo[i].body != NULL)
-      paint_photo (photo + i);
-}
-/* XXX */
-
-
-
 int
 main (int   argc,
       char *argv[])
@@ -661,7 +651,7 @@ main (int   argc,
   }
 
   g_timeout_add ((guint) (1000 * STEP), update_world, NULL);
-  g_signal_connect_after (stage, "paint", paint_world, NULL);
+  g_signal_connect_after (stage, "paint", paint_ropes, NULL);
 
   {
     ClutterTimeline *fade  = clutter_timeline_new ((gint) (1000 * FADE));
