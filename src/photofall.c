@@ -20,37 +20,43 @@
 
 
 
-#define PHOTOS 10
+#define PHOTOS    10
 
-#define ROPE   10
+#define ROPE      10
 
-#define CURVE   4
+#define CURVE      4
 
-#define THICK   1.5
+#define THICK      1.5
 
-#define FADE    5
+#define FADE       5
 
-#define POLL    2
+#define POLL       2
 
-#define ERP     6E-1
+#define ERP        6E-1
 
-#define CFM     1E-9
+#define CFM        1E-9
 
-#define DAMP    4E-2
+#define FRICTION   5E+5
 
-#define STEP    1E-2
+#define BOUNCE     1E-8
 
-#define G       4E-4
+#define STICK      1E-1
 
-#define PPM     5E+3
+#define DAMP       4E-2
 
-#define PAN     2E-2
+#define STEP       1E-2
 
-#define SPACE   6E-1
+#define G          4E-4
 
-#define EDGE    5
+#define PPM        5E+3
 
-#define EXTS   "jpg|png"
+#define PAN        2E-2
+
+#define SPACE      6E-1
+
+#define EDGE       5
+
+#define EXTS      "jpg|png"
 
 
 
@@ -94,6 +100,8 @@ typedef struct
 {
   dBodyID       body;
 
+  dGeomID       geom;
+
   ClutterActor *actor;
 
   Rope          rope[2];
@@ -109,6 +117,10 @@ static gint          next;
 static gfloat        shift;
 
 static dWorldID      world;
+
+static dSpaceID      space;
+
+static dJointGroupID joints;
 
 static ClutterActor *stage;
 
@@ -129,6 +141,10 @@ static void     update_photo  (Photo           *photo);
 static void     paint_rope    (Rope            *rope);
 
 static void     paint_ropes   (void);
+
+static void     check_geoms   (void            *data,
+                               dGeomID          geom0,
+                               dGeomID          geom1);
 
 static gboolean update_world  (gpointer         data);
 
@@ -235,6 +251,10 @@ create_photo (Photo *photo)
     dBodySetAngularDamping (photo->body, DAMP);
     dBodySetAngularDampingThreshold (photo->body, 0);
 
+    photo->geom = dCreateBox (space, (w + 4 * EDGE) / PPM, (h + 4 * EDGE) / PPM, 1E-3);
+    dGeomSetPosition (photo->geom, x / PPM, y / PPM, z / PPM);
+    dGeomSetBody (photo->geom, photo->body);
+
     {
       Rope *rope = photo->rope;
       gint  i;
@@ -299,10 +319,10 @@ create_photo (Photo *photo)
         dBodySetAngularDampingThreshold (rope[1].body[i], 0);
       }
 
-      rope[0].nail = dJointCreateBall (world, 0);
-      rope[1].nail = dJointCreateBall (world, 0);
-      rope[0].glue[ROPE - 1] = dJointCreateBall (world, 0);
-      rope[1].glue[ROPE - 1] = dJointCreateBall (world, 0);
+      rope[0].nail = dJointCreateBall (world, NULL);
+      rope[1].nail = dJointCreateBall (world, NULL);
+      rope[0].glue[ROPE - 1] = dJointCreateBall (world, NULL);
+      rope[1].glue[ROPE - 1] = dJointCreateBall (world, NULL);
       dJointAttach (rope[0].nail, 0, rope[0].body[0]);
       dJointAttach (rope[1].nail, 0, rope[1].body[0]);
       dJointAttach (rope[0].glue[ROPE - 1], rope[0].body[ROPE - 1], photo->body);
@@ -324,11 +344,11 @@ create_photo (Photo *photo)
         gfloat v1 = (y1 + (1 - s) * dy1) / PPM;
         gfloat w1 = (z1 + dz1 + t * (l1 / 2 - dz1)) / PPM;
 
-        rope[0].glue[i] = dJointCreateBall (world, 0);
+        rope[0].glue[i] = dJointCreateBall (world, NULL);
         dJointAttach (rope[0].glue[i], rope[0].body[i], rope[0].body[i + 1]);
         dJointSetBallAnchor (rope[0].glue[i], u0, v0, w0);
 
-        rope[1].glue[i] = dJointCreateBall (world, 0);
+        rope[1].glue[i] = dJointCreateBall (world, NULL);
         dJointAttach (rope[1].glue[i], rope[1].body[i], rope[1].body[i + 1]);
         dJointSetBallAnchor (rope[1].glue[i], u1, v1, w1);
       }
@@ -345,11 +365,11 @@ create_photo (Photo *photo)
         gfloat v1 = (y1 + (1 - s) * dy1) / PPM;
         gfloat w1 = (z1 + (1 - t) * l1 / 2) / PPM;
 
-        rope[0].glue[i] = dJointCreateBall (world, 0);
+        rope[0].glue[i] = dJointCreateBall (world, NULL);
         dJointAttach (rope[0].glue[i], rope[0].body[i], rope[0].body[i + 1]);
         dJointSetBallAnchor (rope[0].glue[i], u0, v0, w0);
 
-        rope[1].glue[i] = dJointCreateBall (world, 0);
+        rope[1].glue[i] = dJointCreateBall (world, NULL);
         dJointAttach (rope[1].glue[i], rope[1].body[i], rope[1].body[i + 1]);
         dJointSetBallAnchor (rope[1].glue[i], u1, v1, w1);
       }
@@ -366,6 +386,9 @@ destroy_photo (Photo *photo)
   {
     dBodyDestroy (photo->body);
     photo->body = NULL;
+
+    dGeomDestroy (photo->geom);
+    photo->geom = NULL;
 
     clutter_actor_destroy (photo->actor);
     photo->actor = NULL;
@@ -549,6 +572,29 @@ paint_ropes (void)
 
 
 
+static void
+check_geoms (void    *data,
+             dGeomID  geom0,
+             dGeomID  geom1)
+{
+  dBodyID  body0 = dGeomGetBody (geom0);
+  dBodyID  body1 = dGeomGetBody (geom1);
+  dContact contact;
+  dJointID correct;
+
+  dCollide (geom0, geom1, 1, &contact.geom, sizeof (dContact));
+
+  contact.surface.mode = dContactBounce;
+  contact.surface.mu = FRICTION;
+  contact.surface.bounce = BOUNCE;
+  contact.surface.bounce_vel = STICK;
+
+  correct = dJointCreateContact (world, joints, &contact);
+  dJointAttach (correct, body0, body1);
+}
+
+
+
 static gboolean
 update_world (gpointer data)
 {
@@ -557,7 +603,9 @@ update_world (gpointer data)
 
   shift += dt * PAN * PPM;
 
+  dSpaceCollide (space, NULL, check_geoms);
   dWorldQuickStep (world, 1);
+  dJointGroupEmpty (joints);
 
   for (i = 0; i < PHOTOS; i++)
     if (photo[i].body != NULL)
@@ -629,6 +677,8 @@ main (int   argc,
   dWorldSetCFM (world, CFM);
   dWorldSetERP (world, ERP);
   dWorldSetGravity (world, 0, G, 0);
+  space = dSimpleSpaceCreate (NULL);
+  joints = dJointGroupCreate (0);
 
   clutter_init (&argc, &argv);
   clutterrific_init (&argc, &argv);
@@ -671,6 +721,8 @@ main (int   argc,
 
   clutter_main ();
 
+  dJointGroupDestroy (joints);
+  dSpaceDestroy (space);
   dWorldDestroy (world);
   dCloseODE ();
 
