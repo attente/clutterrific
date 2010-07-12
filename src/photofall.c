@@ -36,11 +36,11 @@
 
 #define CFM        1E-9
 
-#define FRICTION   5E+5
+#define FRICTION   0
 
-#define BOUNCE     1E-8
+#define BOUNCE     0
 
-#define STICK      1E-1
+#define STICK      9E+9
 
 #define DAMP       4E-2
 
