@@ -42,6 +42,8 @@
 
 #define STICK      9E+9
 
+#define MASS       1E+1
+
 #define DAMP       4E-2
 
 #define STEP       1E-2
@@ -244,7 +246,7 @@ create_photo (Photo *photo)
 
     photo->body = dBodyCreate (world);
     dBodySetPosition (photo->body, x / PPM, y / PPM, z / PPM);
-    dMassSetBox (&mass, 1E+5, w / PPM, h / PPM, 1E-1);
+    dMassSetBoxTotal (&mass, MASS, w / PPM, h / PPM, 1E-1);
     dBodySetMass (photo->body, &mass);
     dBodySetLinearDamping (photo->body, DAMP);
     dBodySetLinearDampingThreshold (photo->body, 0);
@@ -259,7 +261,7 @@ create_photo (Photo *photo)
       Rope *rope = photo->rope;
       gint  i;
 
-      dMassSetSphere (&mass, 1E+3, 1E-1);
+      dMassSetSphereTotal (&mass, 1, 1E-1);
 
       for (i = 0; i < ROPE / 2; i++)
       {
