@@ -32,7 +32,7 @@
 
 #define POLL       2
 
-#define ERP        6E-1
+#define ERP        5E-1
 
 #define CFM        1E-9
 
@@ -46,7 +46,7 @@
 
 #define MASS       1E+1
 
-#define DAMP       4E-2
+#define DAMP       6E-2
 
 #define STEP       1E-2
 
@@ -262,7 +262,8 @@ create_photo (Photo *photo)
     gfloat dy1 = 0.1 * U * g_random_double_range (-1, 0);
     gfloat dz1 = 0.1 * U * g_random_double_range (-1, 1);
 
-    dMass mass;
+    dQuaternion quaternion = { 0, 0, 0, 1 };
+    dMass       mass;
 
     photo->body[0] = dBodyCreate (world);
     photo->body[1] = dBodyCreate (world);
@@ -270,6 +271,9 @@ create_photo (Photo *photo)
     dBodySetPosition (photo->body[0], x / PPM, y / PPM, z / PPM);
     dBodySetPosition (photo->body[1], x0 / PPM, y0 / PPM, z0 / PPM);
     dBodySetPosition (photo->body[2], x1 / PPM, y1 / PPM, z1 / PPM);
+    dBodySetQuaternion (photo->body[0], quaternion);
+    dBodySetQuaternion (photo->body[1], quaternion);
+    dBodySetQuaternion (photo->body[2], quaternion);
     dMassSetBoxTotal (&mass, MASS, w / PPM, h / PPM, 1E-1);
     dBodySetMass (photo->body[0], &mass);
     dMassSetSphereTotal (&mass, 1E-1, 1E-1);
@@ -319,6 +323,7 @@ create_photo (Photo *photo)
 
         rope[0].body[i] = dBodyCreate (world);
         dBodySetPosition (rope[0].body[i], u0, v0, w0);
+        dBodySetQuaternion (rope[0].body[i], quaternion);
         dBodySetMass (rope[0].body[i], &mass);
         dBodySetLinearDamping (rope[0].body[i], DAMP);
         dBodySetLinearDampingThreshold (rope[0].body[i], 0);
@@ -327,6 +332,7 @@ create_photo (Photo *photo)
 
         rope[1].body[i] = dBodyCreate (world);
         dBodySetPosition (rope[1].body[i], u1, v1, w1);
+        dBodySetQuaternion (rope[1].body[i], quaternion);
         dBodySetMass (rope[1].body[i], &mass);
         dBodySetLinearDamping (rope[1].body[i], DAMP);
         dBodySetLinearDampingThreshold (rope[1].body[i], 0);
@@ -348,6 +354,7 @@ create_photo (Photo *photo)
 
         rope[0].body[i] = dBodyCreate (world);
         dBodySetPosition (rope[0].body[i], u0, v0, w0);
+        dBodySetQuaternion (rope[0].body[i], quaternion);
         dBodySetMass (rope[0].body[i], &mass);
         dBodySetLinearDamping (rope[0].body[i], DAMP);
         dBodySetLinearDampingThreshold (rope[0].body[i], 0);
@@ -356,6 +363,7 @@ create_photo (Photo *photo)
 
         rope[1].body[i] = dBodyCreate (world);
         dBodySetPosition (rope[1].body[i], u1, v1, w1);
+        dBodySetQuaternion (rope[1].body[i], quaternion);
         dBodySetMass (rope[1].body[i], &mass);
         dBodySetLinearDamping (rope[1].body[i], DAMP);
         dBodySetLinearDampingThreshold (rope[1].body[i], 0);
