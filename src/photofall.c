@@ -107,28 +107,36 @@ typedef struct
   ClutterActor *actor;
 
   Rope          rope[2];
+
+  gfloat        start;
+
+  gfloat        slack;
 }
 Photo;
 
 
 
-static GPtrArray    *file;
+static GPtrArray     *file;
 
-static gint          next;
+static gint           next;
 
-static gfloat        shift;
+static gfloat         shift;
 
-static dWorldID      world;
+static dWorldID       world;
 
-static dSpaceID      space;
+static dSpaceID       space;
 
-static dJointGroupID joints;
+static dJointGroupID  joints;
 
-static ClutterActor *stage;
+static ClutterActor  *stage;
 
-static ClutterActor *glass;
+static ClutterActor  *glass;
 
-static Photo         photo[PHOTOS];
+static Photo          photo[PHOTOS];
+
+static gfloat         average;
+
+static gint           samples;
 
 
 
@@ -230,9 +238,9 @@ create_photo (Photo *photo)
     gfloat y1 = y0;
     gfloat z1 = z;
 
-    gfloat l = g_random_double_range (2 * EDGE + h / 2, H - 2 * EDGE - h / 2) - y0;
-    gfloat l0 = l + 0.1 * U * g_random_double_range (0, 1);
-    gfloat l1 = l + 0.1 * U * g_random_double_range (0, 1);
+    gfloat l = average * g_random_double_range (-y0, H - h - 4 * EDGE - y0);
+    gfloat l0 = l + 0.1 * U * g_random_double_range (-1, 1);
+    gfloat l1 = 2 * l - l0;
 
     gfloat dx0 = 0.1 * U * g_random_double_range (-1, 1);
     gfloat dy0 = 0.1 * U * g_random_double_range (-1, 0);
@@ -256,6 +264,9 @@ create_photo (Photo *photo)
     photo->geom = dCreateBox (space, (w + 4 * EDGE) / PPM, (h + 4 * EDGE) / PPM, 1E-3);
     dGeomSetPosition (photo->geom, x / PPM, y / PPM, z / PPM);
     dGeomSetBody (photo->geom, photo->body);
+
+    photo->start = y;
+    photo->slack = l;
 
     {
       Rope *rope = photo->rope;
@@ -465,6 +476,10 @@ update_photo (Photo *photo)
 
     if (ax + w + h < shift)
     {
+      average *= samples;
+      average += photo->slack / (ay - photo->start);
+      average /= ++samples;
+
       destroy_photo (photo);
 
       return;
@@ -672,7 +687,9 @@ int
 main (int   argc,
       char *argv[])
 {
-  shift = 0;
+  shift   = 0;
+  average = 1;
+  samples = 0;
 
   dInitODE ();
   world = dWorldCreate ();
