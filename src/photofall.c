@@ -58,6 +58,10 @@
 
 #define SPACE      6E-1
 
+#define LIGHT      1E+0
+
+#define WALL       2E-1
+
 #define EDGE       5
 
 #define EXTS      "jpg|png"
@@ -621,8 +625,9 @@ paint_rope (Rope *rope)
     CoglHandle        buffer = cogl_vertex_buffer_new (2 * points);
     CoglVerticesMode  mode   = COGL_VERTICES_MODE_TRIANGLE_STRIP;
     CoglAttributeType type   = COGL_ATTRIBUTE_TYPE_FLOAT;
+    gint              stride = 3 * sizeof (gfloat);
 
-    cogl_vertex_buffer_add  (buffer, "gl_Vertex", 3, type, TRUE, 12, data);
+    cogl_vertex_buffer_add  (buffer, "gl_Vertex", 3, type, TRUE, stride, data);
     cogl_vertex_buffer_draw (buffer, mode, 0, 2 * points);
 
     cogl_handle_unref (buffer);
@@ -646,6 +651,95 @@ paint_ropes (void)
       paint_rope (photo[i].rope + 1);
     }
   }
+}
+
+
+
+static void
+paint_shadow (Photo *photo)
+{
+  gfloat data[4][3];
+  gfloat light[3];
+  gfloat abc[3];
+  gfloat bc[3];
+  gfloat a[3];
+  gfloat b[3];
+  gfloat c[3];
+  gfloat s, t;
+  gint   i, j;
+
+  light[0] = shift;
+  light[1] = H / 4;
+  light[2] = LIGHT * U;
+
+  {
+    const dReal *d = dBodyGetPosition (photo->body[0]);
+    const dReal *e = dBodyGetPosition (photo->body[1]);
+    const dReal *f = dBodyGetPosition (photo->body[2]);
+
+    for (i = 0; i < 3; i++)
+    {
+      a[i] = d[i] * PPM;
+      b[i] = e[i] * PPM;
+      c[i] = f[i] * PPM;
+
+      abc[i] = (b[i] + c[i]) / 2 - a[i];
+      bc[i] = c[i] - b[i];
+    }
+  }
+
+  s = EDGE / sqrt (dCalcVectorLengthSquare3 (abc));
+  t = EDGE / sqrt (dCalcVectorLengthSquare3 (bc));
+
+  dAddScaledVectors3 (data[0], abc, bc, -s, -t);
+  dAddScaledVectors3 (data[1], abc, bc, -s,  t);
+
+  for (i = 0; i < 3; i++)
+  {
+    data[0][i] += b[i] - a[i];
+    data[1][i] += c[i] - a[i];
+  }
+
+  dCopyNegatedVector3 (data[2], data[1]);
+  dCopyNegatedVector3 (data[3], data[0]);
+
+  for (i = 0; i < 4; i++)
+  {
+    for (j = 0; j < 3; j++)
+      data[i][j] += a[j];
+
+    s = (-WALL * U - light[2]) / (data[i][2] - light[2]);
+
+    for (j = 0; j < 3; j++)
+      data[i][j] = light[j] + s * (data[i][j] - light[j]);
+
+    data[i][0] -= shift;
+  }
+
+  {
+    CoglHandle        buffer = cogl_vertex_buffer_new (4);
+    CoglAttributeType type   = COGL_ATTRIBUTE_TYPE_FLOAT;
+    gint              stride = 3 * sizeof (gfloat);
+
+    cogl_vertex_buffer_add  (buffer, "gl_Vertex", 3, type, TRUE, stride, data);
+    cogl_vertex_buffer_draw (buffer, COGL_VERTICES_MODE_TRIANGLE_STRIP, 0, 4);
+
+    cogl_handle_unref (buffer);
+  }
+}
+
+
+
+static void
+paint_shadows (void)
+{
+  gint i;
+
+  cogl_set_source_color4ub (240, 240, 248, 255);
+
+  for (i = 0; i < PHOTOS; i++)
+    if (photo[i].body[0] != NULL)
+      paint_shadow (photo + i);
 }
 
 
@@ -778,6 +872,8 @@ int
 main (int   argc,
       char *argv[])
 {
+  dGeomID wall;
+
   shift   = 0;
   average = 1;
   samples = 0;
@@ -788,12 +884,15 @@ main (int   argc,
   dWorldSetERP (world, ERP);
   dWorldSetGravity (world, 0, G, 0);
   dWorldSetQuickStepNumIterations (world, 100);
+
   space = dSimpleSpaceCreate (NULL);
   joints = dJointGroupCreate (0);
 
   clutter_init (&argc, &argv);
   clutterrific_init (&argc, &argv);
   cogl_set_depth_test_enabled (TRUE);
+
+  wall = dCreatePlane (space, 0, 0, 1, -WALL * U / PPM);
 
   {
     const gchar *dir = g_get_user_special_dir (G_USER_DIRECTORY_PICTURES);
@@ -813,6 +912,7 @@ main (int   argc,
 
   g_timeout_add ((guint) (1000 * STEP), update_world, NULL);
   g_signal_connect_after (stage, "paint", paint_ropes, NULL);
+  g_signal_connect_after (stage, "paint", paint_shadows, NULL);
 
   {
     ClutterTimeline *fade  = clutter_timeline_new ((gint) (1000 * FADE));
@@ -832,6 +932,15 @@ main (int   argc,
 
   clutter_main ();
 
+  {
+    gint i;
+
+    for (i = 0; i < PHOTOS; i++)
+      if (photo[i].body[0] != NULL)
+        destroy_photo (photo + i);
+  }
+
+  dGeomDestroy (wall);
   dJointGroupDestroy (joints);
   dSpaceDestroy (space);
   dWorldDestroy (world);
