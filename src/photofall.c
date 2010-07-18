@@ -166,6 +166,10 @@ static void     paint_rope    (Rope            *rope);
 
 static void     paint_ropes   (void);
 
+static void     paint_shadow  (Photo           *photo);
+
+static void     paint_shadows (void);
+
 static void     check_snap    (Photo           *photo);
 
 static void     check_geoms   (void            *data,
