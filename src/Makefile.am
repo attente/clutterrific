@@ -20,7 +20,7 @@ memorrific_SOURCES = memorrific.c clutterrific.c
 memorrific_LDADD   = $(LIBS) $(CLUTTER_LIBS)
 
 photofall_SOURCES  = photofall.c clutterrific.c
-photofall_LDADD    = $(LIBS) $(CLUTTER_LIBS) $(ODE_LIBS)
+photofall_LDADD    = $(LIBS) $(CLUTTER_LIBS) $(ODE_LIBS) -lstdc++
 
 cube-twist.desktop: cube-twist.desktop.in
 	cat $^ | sed -e 's|[@]BINDIR[@]|$(bindir)|g' > $@
