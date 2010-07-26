@@ -237,9 +237,12 @@ paint_XXX (void)
   c.cap[0] = 20;
   c.cap[1] = 40;
 
-  cogl_set_source_color4f (0.2, 0.2, 0.4, 1.0);
+  cogl_set_source_color4f (0.8, 0.2, 0.4, 0.8);
 
   paint_curve (&c, t);
+
+  if (t > 1)
+    t = 0;
 }
 
 static gboolean
