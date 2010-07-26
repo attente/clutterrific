@@ -78,6 +78,12 @@
 
 
 
+#ifndef M_PI
+  #define M_PI 3.141592653589793238
+#endif
+
+
+
 #define DEG(x) (180 / M_PI * (x))
 
 #define RAD(x) (M_PI / 180 * (x))
@@ -587,7 +593,7 @@ paint_rope (Rope *rope)
   for (i = 0; i + 1 < ROPE; i++)
   {
     dVector3     a, b, c;
-    const dReal *d = dBodyGetPosition (rope->body[i]);
+    const dReal *d = dBodyGetPosition (rope->body[i + 0]);
     const dReal *e = dBodyGetPosition (rope->body[i + 1]);
 
     dJointGetBallAnchor (rope->glue[i], b);

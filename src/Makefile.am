@@ -4,8 +4,8 @@ AM_CFLAGS   = -ansi -pedantic -Wall
 bindir  = $(GNOME_SCREENSAVER_PRIVLIBEXECDIR)
 metadir = $(GNOME_SCREENSAVER_THEMESDIR)
 
-bin_PROGRAMS = cube-twist flip-clock glow-clock memorrific photofall
-meta_DATA    = cube-twist.desktop flip-clock.desktop glow-clock.desktop memorrific.desktop photofall.desktop
+bin_PROGRAMS = cube-twist flip-clock glow-clock memorrific photofall the-poet
+meta_DATA    = cube-twist.desktop flip-clock.desktop glow-clock.desktop memorrific.desktop photofall.desktop the-poet.desktop
 
 cube_twist_SOURCES = cube-twist.c clutterrific.c
 cube_twist_LDADD   = $(LIBS) $(CLUTTER_LIBS)
@@ -22,6 +22,9 @@ memorrific_LDADD   = $(LIBS) $(CLUTTER_LIBS)
 photofall_SOURCES  = photofall.c clutterrific.c
 photofall_LDADD    = $(LIBS) $(CLUTTER_LIBS) $(ODE_LIBS) -lstdc++
 
+the_poet_SOURCES = the-poet.c clutterrific.c
+the_poet_LDADD   = $(LIBS) $(CLUTTER_LIBS)
+
 cube-twist.desktop: cube-twist.desktop.in
 	cat $^ | sed -e 's|[@]BINDIR[@]|$(bindir)|g' > $@
 
@@ -37,4 +40,7 @@ memorrific.desktop: memorrific.desktop.in
 photofall.desktop: photofall.desktop.in
 	cat $^ | sed -e 's|[@]BINDIR[@]|$(bindir)|g' > $@
 
-MOSTLYCLEANFILES = cube-twist.desktop flip-clock.desktop glow-clock.desktop memorrific.desktop photofall.desktop
+the-poet.desktop: the-poet.desktop.in
+	cat $^ | sed -e 's|[@]BINDIR[@]|$(bindir)|g' > $@
+
+MOSTLYCLEANFILES = cube-twist.desktop flip-clock.desktop glow-clock.desktop memorrific.desktop photofall.desktop the-poet.desktop
