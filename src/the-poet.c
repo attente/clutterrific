@@ -20,7 +20,7 @@
 
 
 
-#define CAPS   3
+#define CAPS   7
 
 #define STEPS 64
 
@@ -71,121 +71,114 @@ static ClutterActor *stage;
 
 
 static void
-paint_curve (const Curve *c,
-             gfloat       t)
+paint_stroke (const Point *p,
+              gfloat       c0,
+              gfloat       c1,
+              gfloat       t)
 {
-  Point   para, perp, q;
-  gint    n, i, j;
+  Point   q, dq, pdq;
   gfloat *data;
   gfloat  l;
-  Point  *p;
+  gint    n;
+  gint    i;
 
-  if (c == NULL || !c->n)
+  if (t < 0)
     return;
+  else if (t > 1)
+    t = 1;
 
-  t    = CLAMP (t, 0, 1) * c->n;
-  n    = CAPS + 1 + STEPS * t + CAPS;
-  data = g_new (gfloat, 3 * (1 + 2 * n + 1));
+  n = CAPS + 1 + STEPS * t + CAPS;
 
-  q.x = 0;
-  q.y = 0;
-  q.z = 0;
+  data = g_new0 (gfloat, 3 * (1 + 2 * n + 1));
 
-  para.x = c->p[0].x - c->p[1].x;
-  para.y = c->p[0].y - c->p[1].y;
+  dq.x = p[1].x - p[0].x;
+  dq.y = p[1].y - p[0].y;
 
-  l = sqrt (para.x * para.x + para.y * para.y);
+  l = sqrt (dq.x * dq.x + dq.y * dq.y);
 
-  perp.x = -para.y * c->p[0].z / l;
-  perp.y =  para.x * c->p[0].z / l;
-  para.x *= c->cap[0] / l;
-  para.y *= c->cap[0] / l;
+  pdq.x = -dq.y * p[0].z / l;
+  pdq.y =  dq.x * p[0].z / l;
 
-  data[0] = c->p[0].x + para.x;
-  data[1] = c->p[0].y + para.y;
-  data[2] = 0;
+  dq.x *= c0 * p[0].z / l;
+  dq.y *= c0 * p[0].z / l;
+
+  data[0] = p[0].x - dq.x;
+  data[1] = p[0].y - dq.y;
 
   for (i = 0; i <= CAPS; i++)
   {
-    gfloat x = sin (M_PI / 2 * (i + 1) / (CAPS + 1));
-    gfloat y = cos (M_PI / 2 * (i + 1) / (CAPS + 1));
+    gfloat a = M_PI / 2 * (i + 1) / (CAPS + 1);
+    gfloat x =  sin (a);
+    gfloat y = -cos (a);
 
-    data[3 * (1 + 2 * i + 0) + 0] = c->p[0].x + x * perp.x + y * para.x;
-    data[3 * (1 + 2 * i + 0) + 1] = c->p[0].y + x * perp.y + y * para.y;
-    data[3 * (1 + 2 * i + 0) + 2] = 0;
-    data[3 * (1 + 2 * i + 1) + 0] = c->p[0].x - x * perp.x + y * para.x;
-    data[3 * (1 + 2 * i + 1) + 1] = c->p[0].y - x * perp.y + y * para.y;
-    data[3 * (1 + 2 * i + 1) + 2] = 0;
+    data[3 * (1 + 2 * i + 0) + 0] = p[0].x + y * dq.x - x * pdq.x;
+    data[3 * (1 + 2 * i + 0) + 1] = p[0].y + y * dq.y - x * pdq.y;
+    data[3 * (1 + 2 * i + 1) + 0] = p[0].x + y * dq.x + x * pdq.x;
+    data[3 * (1 + 2 * i + 1) + 1] = p[0].y + y * dq.y + x * pdq.y;
   }
 
-  for (i = 0; i < t; i++)
+  for (i = 1; i <= STEPS && i - 1 <= STEPS * t; i++)
   {
-    p = c->p + 3 * i;
+    gfloat s = MIN (1.0 * i / STEPS, t);
+    gfloat r = 1 - s;
 
-    for (j = 1; j <= STEPS && j <= STEPS * (t - i) + 1; j++)
-    {
-      gfloat s = MIN (1.0 * j / STEPS, t - i);
-      gfloat r = 1 - s;
+    gfloat r2 = r * r;
+    gfloat s2 = s * s;
+    gfloat r3 = r * r2;
+    gfloat s3 = s * s2;
+    gfloat r2s = r2 * s;
+    gfloat rs2 = r * s2;
 
-      gfloat r2 = r * r;
-      gfloat r3 = r * r2;
+    q.x = r3      * p[0].x
+        + 3 * r2s * p[1].x
+        + 3 * rs2 * p[2].x
+        + s3      * p[3].x;
+    q.y = r3      * p[0].y
+        + 3 * r2s * p[1].y
+        + 3 * rs2 * p[2].y
+        + s3      * p[3].y;
+    q.z = r3      * p[0].z
+        + 3 * r2s * p[1].z
+        + 3 * rs2 * p[2].z
+        + s3      * p[3].z;
 
-      gfloat s2 = s * s;
-      gfloat s3 = s * s2;
+    dq.x = -r2             * p[0].x
+         + r * (1 - 3 * s) * p[1].x
+         + s * (2 - 3 * s) * p[2].x
+         + s2              * p[3].x;
+    dq.y = -r2             * p[0].y
+         + r * (1 - 3 * s) * p[1].y
+         + s * (2 - 3 * s) * p[2].y
+         + s2              * p[3].y;
 
-      gfloat r2s = r2 * s;
-      gfloat rs2 = r * s2;
+    l = sqrt (dq.x * dq.x + dq.y * dq.y);
 
-      q.x = r3 * p[0].x + 3 * r2s * p[1].x + 3 * rs2 * p[2].x + s3 * p[3].x;
-      q.y = r3 * p[0].y + 3 * r2s * p[1].y + 3 * rs2 * p[2].y + s3 * p[3].y;
-      q.z = r3 * p[0].z + 3 * r2s * p[1].z + 3 * rs2 * p[2].z + s3 * p[3].z;
+    pdq.x = -dq.y * q.z / l;
+    pdq.y =  dq.x * q.z / l;
 
-      para.x = 3 * (-r2             * p[0].x +
-                    r * (1 - 3 * s) * p[1].x +
-                    s * (2 - 3 * s) * p[2].x +
-                    s2              * p[3].x);
-      para.y = 3 * (-r2             * p[0].y +
-                    r * (1 - 3 * s) * p[1].y +
-                    s * (2 - 3 * s) * p[2].y +
-                    s2              * p[3].y);
-      para.z = 3 * (-r2             * p[0].z +
-                    r * (1 - 3 * s) * p[1].z +
-                    s * (2 - 3 * s) * p[2].z +
-                    s2              * p[3].z);
-
-      l = sqrt (para.x * para.x + para.y * para.y);
-
-      perp.x = -para.y * q.z / l;
-      perp.y =  para.x * q.z / l;
-
-      data[3 * (1 + 2 * (CAPS + STEPS * i + j) + 0) + 0] = q.x - perp.x;
-      data[3 * (1 + 2 * (CAPS + STEPS * i + j) + 0) + 1] = q.y - perp.y;
-      data[3 * (1 + 2 * (CAPS + STEPS * i + j) + 0) + 2] = 0;
-      data[3 * (1 + 2 * (CAPS + STEPS * i + j) + 1) + 0] = q.x + perp.x;
-      data[3 * (1 + 2 * (CAPS + STEPS * i + j) + 1) + 1] = q.y + perp.y;
-      data[3 * (1 + 2 * (CAPS + STEPS * i + j) + 1) + 2] = 0;
-    }
+    data[3 * (1 + 2 * (CAPS + i) + 0) + 0] = q.x - pdq.x;
+    data[3 * (1 + 2 * (CAPS + i) + 0) + 1] = q.y - pdq.y;
+    data[3 * (1 + 2 * (CAPS + i) + 1) + 0] = q.x + pdq.x;
+    data[3 * (1 + 2 * (CAPS + i) + 1) + 1] = q.y + pdq.y;
   }
 
-  para.x *= c->cap[1] / l;
-  para.y *= c->cap[1] / l;
+  dq.x *= c1 * q.z / l;
+  dq.y *= c1 * q.z / l;
 
-  for (i = 0; i <= CAPS; i++)
+  for (i = 0; i < CAPS; i++)
   {
-    gfloat x = cos (M_PI / 2 * i / (CAPS + 1));
-    gfloat y = sin (M_PI / 2 * i / (CAPS + 1));
+    gfloat a = M_PI / 2 * (i + 1) / (CAPS + 1);
+    gfloat x = cos (a);
+    gfloat y = sin (a);
 
-    data[3 * (1 + 2 * (n - CAPS - 1 + i) + 0) + 0] = q.x - x * perp.x + y * para.x;
-    data[3 * (1 + 2 * (n - CAPS - 1 + i) + 0) + 1] = q.y - x * perp.y + y * para.y;
-    data[3 * (1 + 2 * (n - CAPS - 1 + i) + 0) + 2] = 0;
-    data[3 * (1 + 2 * (n - CAPS - 1 + i) + 1) + 0] = q.x + x * perp.x + y * para.x;
-    data[3 * (1 + 2 * (n - CAPS - 1 + i) + 1) + 1] = q.y + x * perp.y + y * para.y;
-    data[3 * (1 + 2 * (n - CAPS - 1 + i) + 1) + 2] = 0;
+    data[3 * (1 + 2 * (n - CAPS + i) + 0) + 0] = q.x + y * dq.x - x * pdq.x;
+    data[3 * (1 + 2 * (n - CAPS + i) + 0) + 1] = q.y + y * dq.y - x * pdq.y;
+    data[3 * (1 + 2 * (n - CAPS + i) + 1) + 0] = q.x + y * dq.x + x * pdq.x;
+    data[3 * (1 + 2 * (n - CAPS + i) + 1) + 1] = q.y + y * dq.y + x * pdq.y;
   }
 
-  data[3 * (1 + 2 * n) + 0] = q.x + para.x;
-  data[3 * (1 + 2 * n) + 1] = q.y + para.y;
-  data[3 * (1 + 2 * n) + 2] = 0;
+  data[3 * (1 + 2 * n) + 0] = q.x + dq.x;
+  data[3 * (1 + 2 * n) + 1] = q.y + dq.y;
 
   {
     CoglHandle        buffer = cogl_vertex_buffer_new (1 + 2 * n + 1);
@@ -204,18 +197,40 @@ paint_curve (const Curve *c,
 
 
 static void
+paint_curve (const Curve *c,
+             gfloat       t)
+{
+  gint i;
+
+  if (c == NULL)
+    return;
+
+  t = c->n * CLAMP (t, 0, 1);
+
+  for (i = 0; i < t; i++)
+  {
+    gfloat c0 = i ?            1 : c->cap[0];
+    gfloat c1 = i + 1 < c->n ? 1 : c->cap[1];
+
+    paint_stroke (c->p + 3 * i, c0, c1, t - i);
+  }
+}
+
+
+
+static void
 paint_XXX (void)
 {
   static gfloat t = 0;
   Curve         c;
 
-  t += 0.01;
+  t += 0.001;
 
   c.n = 2;
   c.p = g_new (Point, 7);
   c.p[0].x = 100;
   c.p[0].y = 100;
-  c.p[0].z = 40;
+  c.p[0].z = 4;
   c.p[1].x = 100;
   c.p[1].y = 300;
   c.p[1].z = 40;
@@ -233,9 +248,9 @@ paint_XXX (void)
   c.p[5].z = 40;
   c.p[6].x = 100;
   c.p[6].y = 500;
-  c.p[6].z = 10;
-  c.cap[0] = 20;
-  c.cap[1] = 40;
+  c.p[6].z = 4;
+  c.cap[0] = 1;
+  c.cap[1] = 1;
 
   cogl_set_source_color4f (0.8, 0.2, 0.4, 0.8);
 
