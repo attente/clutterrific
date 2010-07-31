@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="256"
+   height="256"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="the-poet.svg">
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="141.95714"
+     inkscape:cy="117"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1280"
+     inkscape:window-height="725"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:object-nodes="false"
+     inkscape:snap-smooth-nodes="false" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-796.36218)">
+    <rect
+       style="stroke-width:20;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke:none;fill:#e0e0e0;fill-opacity:1"
+       id="rect2816"
+       width="256"
+       height="256"
+       x="0"
+       y="796.36218" />
+    <g
+       id="g2815"
+       transform="translate(2.3441142,-2.4065195)">
+      <path
+         sodipodi:nodetypes="czzzzz"
+         id="curve_0"
+         d="m 194.54567,873.04427 c -45.74543,6.46407 -66.78197,119.28137 -121.609007,119.29964 -54.82704,0.0183 -48.563946,-66.7637 -4,-71 44.563947,-4.2363 45.579317,40.21121 13,56 C 49.35734,993.1327 9.2088235,961.86103 25.700366,923.85304 42.286121,885.62792 107.88167,905.95342 84.091352,949.46206"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         sodipodi:nodetypes="cczzzc"
+         id="curve_1"
+         d="m 194.54567,873.04427 c -18.79034,30.29009 -29.45447,66.6272 -37.27162,122.25092 5.3658,-37.42597 17.28516,-74.72049 -2.19976,-93.11572 -19.48492,-18.39523 -55.74422,-1.49086 -40.66261,32.36298 15.08161,33.85384 88.91619,41.64058 108.81486,-4.55421 19.89867,-46.19479 -11.09988,-80.34348 -48.99025,-69.83435"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
+  </g>
+</svg>
