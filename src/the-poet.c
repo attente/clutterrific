@@ -127,6 +127,45 @@ glyph_free (Glyph *glyph)
 
 
 
+static Curve *
+curve_read (GVariant *data)
+{
+  const GVariantType *type = (const GVariantType *) "(dda(ddd))";
+
+  Curve        *curve;
+  GVariant     *array;
+  GVariantIter  iter;
+  gdouble       cap[2];
+  gint          points;
+  gdouble       p[3];
+  gint          i;
+
+  if (data == NULL || !g_variant_is_of_type (data, type))
+    return NULL;
+
+  g_variant_get (data, "(dd@a(ddd))", cap + 0, cap + 1, &array);
+  points = g_variant_n_children (array);
+
+  curve         = g_new (Curve, 1);
+  curve->n      = (points - 1) / 3;
+  curve->p      = g_new (Point, points);
+  curve->cap[0] = cap[0];
+  curve->cap[1] = cap[1];
+
+  g_variant_iter_init (&iter, array);
+
+  for (i = 0; g_variant_iter_loop (&iter, "(ddd)", p + 0, p + 1, p + 2); i++)
+  {
+    curve->p[i].x = p[0];
+    curve->p[i].y = p[1];
+    curve->p[i].z = p[2];
+  }
+
+  return curve;
+}
+
+
+
 static Glyph *
 glyph_read (GVariant *data)
 {
@@ -141,21 +180,41 @@ glyph_read (GVariant *data)
   if (data == NULL || !g_variant_is_of_type (data, type))
     return NULL;
 
-  glyph = g_new (Glyph, 1);
-
   g_variant_get_child (data, 1, "(dd)", &x, &y);
 
+  glyph        = g_new (Glyph, 1);
+  glyph->n     = 0;
   glyph->end.x = x;
   glyph->end.y = y;
+  glyph->life  = 0;
+  glyph->time  = NULL;
+  glyph->curve = NULL;
 
   data = g_variant_get_child_value (data, 0);
 
   g_variant_iter_init (&iter, data);
 
-  while (g_variant_iter_loop (&iter, "(dd@(dda(ddd)))", t, t + 1, &curve))
+  while (g_variant_iter_loop (&iter, "(dd@(dda(ddd)))", t + 0, t + 1, &curve))
   {
-    /* XXX */
+    gfloat *f[2];
+
+    glyph->life += t[0];
+    glyph->life += t[1];
+
+    f[0] = g_new (gfloat, 1);
+    f[1] = g_new (gfloat, 1);
+    *f[0] = t[0];
+    *f[1] = t[1];
+    glyph->time = g_slist_prepend (glyph->time, f[0]);
+    glyph->time = g_slist_prepend (glyph->time, f[1]);
+
+    glyph->curve = g_slist_prepend (glyph->curve, curve_read (curve));
+
+    glyph->n++;
   }
+
+  glyph->time  = g_slist_reverse (glyph->time);
+  glyph->curve = g_slist_reverse (glyph->curve);
 
   return glyph;
 }
