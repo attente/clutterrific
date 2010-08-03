@@ -87,7 +87,124 @@ static ClutterActor *stage;
 
 
 static void
-paint_stroke (const Point *p,
+destroy (gpointer data,
+         gpointer user)
+{
+  g_free (data);
+}
+
+
+
+static void
+curve_free (Curve *curve)
+{
+  g_free (curve->p);
+  g_free (curve);
+}
+
+
+
+static void
+curve_destroy (gpointer data,
+               gpointer user)
+{
+  curve_free (data);
+}
+
+
+
+static void
+glyph_free (Glyph *glyph)
+{
+  g_slist_foreach (glyph->time, destroy, NULL);
+  g_slist_free    (glyph->time);
+
+  g_slist_foreach (glyph->curve, curve_destroy, NULL);
+  g_slist_free    (glyph->curve);
+
+  g_free (glyph);
+}
+
+
+
+static Glyph *
+glyph_read (GVariant *data)
+{
+  const GVariantType *type = (const GVariantType *) "(a(dd(dda(ddd)))(dd))";
+
+  Glyph        *glyph;
+  GVariant     *curve;
+  GVariantIter  iter;
+  gdouble       x, y;
+  gdouble       t[2];
+
+  if (data == NULL || !g_variant_is_of_type (data, type))
+    return NULL;
+
+  glyph = g_new (Glyph, 1);
+
+  g_variant_get_child (data, 1, "(dd)", &x, &y);
+
+  glyph->end.x = x;
+  glyph->end.y = y;
+
+  data = g_variant_get_child_value (data, 0);
+
+  g_variant_iter_init (&iter, data);
+
+  while (g_variant_iter_loop (&iter, "(dd@(dda(ddd)))", t, t + 1, &curve))
+  {
+    /* XXX */
+  }
+
+  return glyph;
+}
+
+
+
+static GHashTable *
+font_read (GVariant *data)
+{
+  const GVariantType *type = (const GVariantType *) "a{s(a(dd(dda(ddd)))(dd))}";
+
+  GHashTable   *font;
+  GVariantIter  iter;
+  gchar        *key;
+  GVariant     *val;
+
+  if (data == NULL || !g_variant_is_of_type (data, type))
+    return NULL;
+
+  font = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) glyph_free);
+
+  g_variant_iter_init (&iter, data);
+
+  while (g_variant_iter_loop (&iter, "{s@(a(dd(dda(ddd)))(dd))}", &key, &val))
+    g_hash_table_insert (font, key, glyph_read (val));
+
+  g_variant_unref (data);
+
+  return font;
+}
+
+
+
+static GHashTable *
+font_parse (const gchar *text)
+{
+  const GVariantType *type = (const GVariantType *) "a{s(a(dd(dda(ddd)))(dd))}";
+  GVariant           *data = g_variant_parse (type, text, NULL, NULL, NULL);
+  GHashTable         *font = data == NULL ? NULL : font_read (data);
+
+  g_variant_unref (data);
+
+  return font;
+}
+
+
+
+static void
+stroke_paint (const Point *p,
               gfloat       c0,
               gfloat       c1,
               gfloat       t)
@@ -213,7 +330,7 @@ paint_stroke (const Point *p,
 
 
 static void
-paint_curve (const Curve *c,
+curve_paint (const Curve *c,
              gfloat       t)
 {
   gint i;
@@ -228,14 +345,14 @@ paint_curve (const Curve *c,
     gfloat c0 = i ?            1 : c->cap[0];
     gfloat c1 = i + 1 < c->n ? 1 : c->cap[1];
 
-    paint_stroke (c->p + 3 * i, c0, c1, t - i);
+    stroke_paint (c->p + 3 * i, c0, c1, t - i);
   }
 }
 
 
 
 static void
-paint_glyph (const Glyph *g,
+glyph_paint (const Glyph *g,
              gfloat       t)
 {
   if (g != NULL)
@@ -247,7 +364,7 @@ paint_glyph (const Glyph *g,
     {
       gfloat life = * (gfloat *) time->data;
 
-      paint_curve (curve->data, t / life);
+      curve_paint (curve->data, t / life);
       t -= life;
 
       time = time->next;
@@ -408,34 +525,6 @@ paint_XXX (void)
     }
   }
 
-/*
-  c.n = 2;
-  c.p = g_new (Point, 7);
-  c.p[0].x = 50;
-  c.p[0].y = 50;
-  c.p[0].z = 10;
-  c.p[1].x = 50;
-  c.p[1].y = 300;
-  c.p[1].z = 60;
-  c.p[2].x = 590;
-  c.p[2].y = 300;
-  c.p[2].z = 10;
-  c.p[3].x = 590;
-  c.p[3].y = 430;
-  c.p[3].z = 20;
-  c.p[4].x = 430;
-  c.p[4].y = -300;
-  c.p[4].z = 80;
-  c.p[5].x = 500;
-  c.p[5].y = 430;
-  c.p[5].z = 40;
-  c.p[6].x = 50;
-  c.p[6].y = 430;
-  c.p[6].z = 4;
-  c.cap[0] = 1.5;
-  c.cap[1] = 0.8;
-*/
-
   if (t <= g.life + fade / 2 * dt)
     cogl_set_source_color4f (0.0, 0.0, 0.0, 1.0);
   else
@@ -444,7 +533,7 @@ paint_XXX (void)
     cogl_set_source_color4f (alpha, alpha, alpha, 1.0);
   }
 
-  paint_glyph (&g, t);
+  glyph_paint (&g, t);
 
   t += dt;
 

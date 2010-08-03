@@ -106,7 +106,7 @@ def timeline (paths):
   comma = ''
 
   for path in paths:
-    text = '%s%s\n  %s: (1.0, 0.0)' % (text, comma, string (path))
+    text = '%s%s\n  %s: (1.0, 0.0, 1.0, 1.0)' % (text, comma, string (path))
     comma = ','
 
   return '{%s\n}' % text
@@ -121,11 +121,11 @@ def special (name, namespace):
 
 
 def main (argv):
-  times = {}
+  data = {}
 
   if len (argv) == 2:
     with open (argv[1]) as f:
-      times = eval (f.read ())
+      data = eval (f.read ())
 
   svg = xml.dom.minidom.parseString (sys.stdin.read ())
   paths = svg.getElementsByTagName ('path')
@@ -180,9 +180,9 @@ def main (argv):
 
         i += 1
 
-      time = times[path] if path in times else (1, 0)
+      param = data[path] if path in data else (1, 0, 1, 1)
 
-      glyph.append ((time[0], time[1], curve))
+      glyph.append ((param[0], param[1], (param[2], param[3], curve)))
 
     font[name] = glyph, (x1 - x0, y1 - y0)
 
