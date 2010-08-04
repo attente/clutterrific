@@ -459,6 +459,75 @@ glyph_paint (const Glyph *g,
 
 
 
+static gfloat
+text_size (GHashTable  *font,
+           const gchar *text)
+{
+  gchar  *name = g_new (gchar, 4);
+  gfloat  x    = 0;
+  gint    i;
+
+  for (i = 0; text[i]; i++)
+  {
+    gboolean  head  = !i           || g_ascii_isspace (text[i - 1]);
+    gboolean  tail  = !text[i + 1] || g_ascii_isspace (text[i + 1]);
+
+    Glyph    *glyph = NULL;
+
+    if (head && tail)
+    {
+      name[0] = '_';
+      name[1] = text[i];
+      name[2] = '_';
+      name[3] = 0;
+
+      glyph = g_hash_table_lookup (font, name);
+    }
+
+    if (glyph == NULL && head)
+    {
+      name[0] = '_';
+      name[1] = text[i];
+      name[2] = 0;
+
+      glyph = g_hash_table_lookup (font, name);
+    }
+
+    if (glyph == NULL && tail)
+    {
+      name[0] = text[i];
+      name[1] = '_';
+      name[2] = 0;
+
+      glyph = g_hash_table_lookup (font, name);
+    }
+
+    if (glyph == NULL)
+    {
+      name[0] = text[i];
+      name[1] = 0;
+
+      glyph = g_hash_table_lookup (font, name);
+    }
+
+    if (glyph != NULL)
+      x += glyph->end.x;
+  }
+
+  return x;
+}
+
+
+
+static void
+text_paint (GHashTable  *font,
+            const gchar *text,
+            gfloat       time)
+{
+}
+
+
+
 static void
 paint_XXX (void)
 {
