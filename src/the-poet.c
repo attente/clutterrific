@@ -459,62 +459,52 @@ glyph_paint (const Glyph *g,
 
 
 
-static gfloat
-text_size (GHashTable  *font,
-           const gchar *text)
+static const Glyph *
+glyph_lookup (GHashTable *font,
+              gchar       name,
+              gboolean    head,
+              gboolean    tail)
 {
-  gchar  *name = g_new (gchar, 4);
-  gfloat  x    = 0;
-  gint    i;
+  const Glyph *glyph = NULL;
+  gchar        key[4];
 
-  for (i = 0; text[i]; i++)
+  if (head && tail)
   {
-    gboolean  head  = !i           || g_ascii_isspace (text[i - 1]);
-    gboolean  tail  = !text[i + 1] || g_ascii_isspace (text[i + 1]);
+    key[0] = '_';
+    key[1] = name;
+    key[2] = '_';
+    key[3] = 0;
 
-    Glyph    *glyph = NULL;
-
-    if (head && tail)
-    {
-      name[0] = '_';
-      name[1] = text[i];
-      name[2] = '_';
-      name[3] = 0;
-
-      glyph = g_hash_table_lookup (font, name);
-    }
-
-    if (glyph == NULL && head)
-    {
-      name[0] = '_';
-      name[1] = text[i];
-      name[2] = 0;
-
-      glyph = g_hash_table_lookup (font, name);
-    }
-
-    if (glyph == NULL && tail)
-    {
-      name[0] = text[i];
-      name[1] = '_';
-      name[2] = 0;
-
-      glyph = g_hash_table_lookup (font, name);
-    }
-
-    if (glyph == NULL)
-    {
-      name[0] = text[i];
-      name[1] = 0;
-
-      glyph = g_hash_table_lookup (font, name);
-    }
-
-    if (glyph != NULL)
-      x += glyph->end.x;
+    glyph = g_hash_table_lookup (font, key);
   }
 
-  return x;
+  if (glyph == NULL && head)
+  {
+    key[0] = '_';
+    key[1] = name;
+    key[2] = 0;
+
+    glyph = g_hash_table_lookup (font, key);
+  }
+
+  if (glyph == NULL && tail)
+  {
+    key[0] = name;
+    key[1] = '_';
+    key[2] = 0;
+
+    glyph = g_hash_table_lookup (font, key);
+  }
+
+  if (glyph == NULL)
+  {
+    key[0] = name;
+    key[1] = 0;
+
+    glyph = g_hash_table_lookup (font, key);
+  }
+
+  return glyph;
 }
 
 
@@ -522,8 +512,53 @@ text_size (GHashTable  *font,
 static void
 text_paint (GHashTable  *font,
             const gchar *text,
-            gfloat       time)
+            gfloat       x,
+            gfloat       y,
+            gfloat       t)
 {
+  gint i;
+
+  for (i = 0; t > 0 && text[i]; i++)
+  {
+    gboolean head = !i           || g_ascii_isspace (text[i - 1]);
+    gboolean tail = !text[i + 1] || g_ascii_isspace (text[i + 1]);
+
+    const Glyph *glyph = glyph_lookup (font, text[i], head, tail);
+
+    if (glyph != NULL)
+    {
+      cogl_translate (x, y, 0);
+
+      glyph_paint (glyph, t);
+
+      x += glyph->end.x;
+      y += glyph->end.y;
+      t -= glyph->life;
+    }
+  }
+}
+
+
+
+static gfloat
+text_size (GHashTable  *font,
+           const gchar *text)
+{
+  gfloat x = 0;
+  gint   i;
+
+  for (i = 0; text[i]; i++)
+  {
+    gboolean head = !i           || g_ascii_isspace (text[i - 1]);
+    gboolean tail = !text[i + 1] || g_ascii_isspace (text[i + 1]);
+
+    const Glyph *glyph = glyph_lookup (font, text[i], head, tail);
+
+    if (glyph != NULL)
+      x += glyph->end.x;
+  }
+
+  return x;
 }
 
 
