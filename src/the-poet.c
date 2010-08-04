@@ -82,6 +82,8 @@ Glyph;
 
 static gfloat        shift;
 
+static GHashTable   *font;
+
 static ClutterActor *stage;
 
 
@@ -239,7 +241,7 @@ font_read (GVariant *data)
   g_variant_iter_init (&iter, data);
 
   while (g_variant_iter_loop (&iter, "{s@(a(dd(dda(ddd)))(dd))}", &key, &val))
-    g_hash_table_insert (font, key, glyph_read (val));
+    g_hash_table_insert (font, g_strdup (key), glyph_read (val));
 
   g_variant_unref (data);
 
@@ -256,6 +258,22 @@ font_parse (const gchar *text)
   GHashTable         *font = data == NULL ? NULL : font_read (data);
 
   g_variant_unref (data);
+
+  return font;
+}
+
+
+
+static GHashTable *
+font_load (const gchar *file)
+{
+  GHashTable *font = NULL;
+  gchar      *text = NULL;
+
+  if (g_file_get_contents (file, &text, NULL, NULL))
+    font = font_parse (text);
+
+  g_free (text);
 
   return font;
 }
@@ -444,159 +462,29 @@ glyph_paint (const Glyph *g,
 static void
 paint_XXX (void)
 {
-  static gfloat t = -80;
-  static gfloat dt = 0.125;
-  gfloat  fade = 300;
-  gfloat *time;
-  Glyph   g;
-  Curve   c[2];
+  Glyph *g = g_hash_table_lookup (font, "g2815");
 
-  g.n    = 2;
-  g.life = 9;
-  time = g_new (gfloat, 3);
-  time[0] = 4;
-  time[1] = 1;
-  time[2] = 4;
-  g.time = NULL;
-  g.time = g_slist_append (g.time, time + 0);
-  g.time = g_slist_append (g.time, time + 1);
-  g.time = g_slist_append (g.time, time + 2);
-  c[0].n = 5;
-  c[0].p = g_new (Point, 16);
-  c[0].p[0].x = 0.0;
-  c[0].p[0].y = 0.0;
-  c[0].p[0].z = 1.0;
-  c[0].p[1].x = -45.745429999999999;
-  c[0].p[1].y = 6.4640699999999924;
-  c[0].p[1].z = 16.0;
-  c[0].p[2].x = -66.781970000000001;
-  c[0].p[2].y = 119.28137000000004;
-  c[0].p[2].z = 12.0;
-  c[0].p[3].x = -121.60900700000001;
-  c[0].p[3].y = 119.29964000000007;
-  c[0].p[3].z = 4.0;
-  c[0].p[4].x = -176.436047;
-  c[0].p[4].y = 119.31794000000002;
-  c[0].p[4].z = 4.0;
-  c[0].p[5].x = -170.17295300000001;
-  c[0].p[5].y = 52.535939999999982;
-  c[0].p[5].z = 2.0;
-  c[0].p[6].x = -125.60900700000001;
-  c[0].p[6].y = 48.299640000000068;
-  c[0].p[6].z = 2.0;
-  c[0].p[7].x = -81.045060000000007;
-  c[0].p[7].y = 44.063340000000039;
-  c[0].p[7].z = 2.0;
-  c[0].p[8].x = -80.029690000000002;
-  c[0].p[8].y = 88.510850000000005;
-  c[0].p[8].z = 2.0;
-  c[0].p[9].x = -112.60900700000001;
-  c[0].p[9].y = 104.29964000000007;
-  c[0].p[9].z = 2.0;
-  c[0].p[10].x = -145.18833000000001;
-  c[0].p[10].y = 120.08843000000002;
-  c[0].p[10].z = 2.0;
-  c[0].p[11].x = -185.33684650000001;
-  c[0].p[11].y = 88.816760000000045;
-  c[0].p[11].z = 2.0;
-  c[0].p[12].x = -168.845304;
-  c[0].p[12].y = 50.808769999999981;
-  c[0].p[12].z = 1.0;
-  c[0].p[13].x = -152.25954899999999;
-  c[0].p[13].y = 12.583650000000034;
-  c[0].p[13].z = 1.0;
-  c[0].p[14].x = -86.664000000000001;
-  c[0].p[14].y = 32.909150000000068;
-  c[0].p[14].z = 1.0;
-  c[0].p[15].x = -110.454318;
-  c[0].p[15].y = 76.417789999999968;
-  c[0].p[15].z = 1.0;
+  static gfloat  t = -10.000;
+  static gfloat dt =   0.125;
 
-  c[1].n = 5;
-  c[1].p = g_new (Point, 16);
-  c[1].p[0].x = 0.0;
-  c[1].p[0].y = 0.0;
-  c[1].p[0].z = 1.0;
-  c[1].p[1].x = -18.790340000000015;
-  c[1].p[1].y = 30.290089999999964;
-  c[1].p[1].z = 12.0;
-  c[1].p[2].x = -29.454470000000015;
-  c[1].p[2].y = 66.627200000000016;
-  c[1].p[2].z = 8.0;
-  c[1].p[3].x = -37.271620000000013;
-  c[1].p[3].y = 122.25092000000006;
-  c[1].p[3].z = 4.0;
-  c[1].p[4].x = -31.905820000000006;
-  c[1].p[4].y = 84.824950000000058;
-  c[1].p[4].z = 4.0;
-  c[1].p[5].x = -19.986459999999994;
-  c[1].p[5].y = 47.530430000000024;
-  c[1].p[5].z = 3.0;
-  c[1].p[6].x = -39.471380000000011;
-  c[1].p[6].y = 29.135200000000054;
-  c[1].p[6].z = 2.0;
-  c[1].p[7].x = -58.956299999999999;
-  c[1].p[7].y = 10.739969999999971;
-  c[1].p[7].z = 2.0;
-  c[1].p[8].x = -95.215599999999995;
-  c[1].p[8].y = 27.644340000000057;
-  c[1].p[8].z = 2.0;
-  c[1].p[9].x = -80.133989999999997;
-  c[1].p[9].y = 61.498180000000048;
-  c[1].p[9].z = 2.0;
-  c[1].p[10].x = -65.052379999999999;
-  c[1].p[10].y = 95.352020000000039;
-  c[1].p[10].z = 2.0;
-  c[1].p[11].x = 8.7821999999999889;
-  c[1].p[11].y = 103.13876000000005;
-  c[1].p[11].z = 2.0;
-  c[1].p[12].x = 28.680869999999999;
-  c[1].p[12].y = 56.943970000000036;
-  c[1].p[12].z = 1.0;
-  c[1].p[13].x = 48.579540000000009;
-  c[1].p[13].y = 10.749180000000024;
-  c[1].p[13].z = 1.0;
-  c[1].p[14].x = 17.580989999999986;
-  c[1].p[14].y = -23.399509999999964;
-  c[1].p[14].z = 1.0;
-  c[1].p[15].x = -20.309380000000004;
-  c[1].p[15].y = -12.890379999999936;
-  c[1].p[15].z = 1.0;
-  c[0].cap[0] = 1;
-  c[0].cap[1] = 1;
-  g.curve = NULL;
-  g.curve = g_slist_append (g.curve, c + 0);
-  g.curve = g_slist_append (g.curve, c + 1);
+  gfloat fade = 300;
 
-  {
-    gint i;
+  cogl_translate (300, 200, 0);
 
-    for (i = 0; i < 16; i++)
-    {
-      c[0].p[i].x *= 2.5;
-      c[0].p[i].y *= 2.5;
-      c[1].p[i].x *= 2.5;
-      c[1].p[i].y *= 2.5;
-      c[0].p[i].x += 480;
-      c[0].p[i].y += 110;
-      c[1].p[i].x += 480;
-      c[1].p[i].y += 110;
-    }
-  }
-
-  if (t <= g.life + fade / 2 * dt)
+  if (t <= g->life + fade / 2 * dt)
     cogl_set_source_color4f (0.0, 0.0, 0.0, 1.0);
   else
   {
-    gfloat alpha = (t - g.life - fade / 2 * dt) / (fade / 2 * dt);
+    gfloat alpha = (t - g->life - fade / 2 * dt) / (fade / 2 * dt);
+
     cogl_set_source_color4f (alpha, alpha, alpha, 1.0);
   }
 
-  glyph_paint (&g, t);
+  glyph_paint (g, t);
 
   t += dt;
 
-  if (t > g.life + fade * dt)
+  if (t > g->life + fade * dt)
   {
     t = -40 * 40 * dt * dt;
     dt /= 2;
@@ -618,6 +506,7 @@ main (int   argc,
       char *argv[])
 {
   shift = 0;
+  font  = font_load ("the-poet.font");
 
   clutter_init      (&argc, &argv);
   clutterrific_init (&argc, &argv);
