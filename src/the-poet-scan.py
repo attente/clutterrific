@@ -49,8 +49,9 @@
 #
 # Standard output:
 # Dictionary (font) mapping strings (names) to pairs of lists of
-# triples of floats (stroke times), floats (wait times) and lists
-# (curves) of points (circles) and points (anchors)
+# triples of floats (stroke times), floats (wait times) and triples
+# of floats (starting cap ratios), floats (ending cap ratios) and
+# lists (curves) of points (circles) and points (anchors)
 
 
 
@@ -89,9 +90,13 @@ def output (font):
 
 
 
-def radii (sizes):
+def radii (sizes, anchors):
   text = ''
   comma = ''
+
+  for key, anchor in anchors.items ():
+    text = '%s%s\n  %s: (%f, %f)' % (text, comma, string (key), anchor[0], anchor[1])
+    comma = ','
 
   for key, size in sizes.items ():
     text = '%s%s\n  %s: %f' % (text, comma, string (key), size)
@@ -135,11 +140,12 @@ def main (argv):
   circles = svg.getElementsByTagName ('circle')
   circles = dict ((c.getAttribute ('id'), c) for c in circles)
 
-  font = {}
+  font    = {}
+  anchors = {}
 
   for group in svg.getElementsByTagName ('g'):
     name = group.getAttribute ('id')
-    ignore = name[-1] == '_' and name[:-1] in pathnames
+    ignore = name[-2:] == '__' and name[:-2] in pathnames
     ignore = ignore or '%s_0' % name not in circles
     ignore = ignore or '%s_1' % name not in circles
 
@@ -149,9 +155,19 @@ def main (argv):
     origin = circles['%s_0' % name]
     x0 = float (origin.getAttribute ('cx'))
     y0 = float (origin.getAttribute ('cy'))
+    t0 = origin.getAttribute ('transform')
+    t0 = re.match ('\s*translate\s*\(\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*,\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*\)', t0)
+    t0 = (float (t0.group (1)), float (t0.group (2))) if t0 else (0, 0)
     anchor = circles['%s_1' % name]
     x1 = float (anchor.getAttribute ('cx'))
     y1 = float (anchor.getAttribute ('cy'))
+    t1 = anchor.getAttribute ('transform')
+    t1 = re.match ('\s*translate\s*\(\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*,\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*\)', t1)
+    t1 = (float (t1.group (1)), float (t1.group (2))) if t1 else (0, 0)
+    x1 += t1[0] - t0[0]
+    y1 += t1[1] - t0[1]
+
+    anchors['%s_1' % name] = x1 - x0, y1 - y0
 
     paths = group.getElementsByTagName ('path')
     paths = [p.getAttribute ('id') for p in paths if p.hasAttribute ('id')]
@@ -170,7 +186,7 @@ def main (argv):
 
         if circle.hasAttribute ('transform'):
           transform = circle.getAttribute ('transform')
-          match = re.match ('\s*scale\s*\(\s*(-?\d+(?:\.\d+)?)\s*,\s*-?\d+(?:\.\d+)?\s*\)', transform) or re.match ('\s*matrix\s*\(\s*(-?\d+(?:\.\d+)?)(?:\s*,\s*-?\d+(?:\.\d+)?){5}\s*\)', transform)
+          match = re.match ('\s*scale\s*\(\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*,\s*-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?\s*\)', transform) or re.match ('\s*matrix\s*\(\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)(?:\s*,\s*-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?){5}\s*\)', transform)
           scale = float (match.group (1))
 
         r = float (circle.getAttribute ('r')) * scale
@@ -191,11 +207,12 @@ def main (argv):
   if len (argv) == 3:
     with open (argv[1], 'w') as f:
       sizes = dict ((k, float (v.getAttribute ('r'))) for k, v in circles.items () if not special (k, groupnames))
-      f.write (radii (sizes))
+
+      f.write (radii (sizes, anchors))
       f.write ('\n')
 
     with open (argv[2], 'w') as f:
-      f.write (timeline (paths))
+      f.write (timeline (pathnames))
       f.write ('\n')
 
 

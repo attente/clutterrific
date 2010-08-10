@@ -51,6 +51,10 @@ static gfloat        width;
 
 static gfloat        height;
 
+static gint          loaded;
+
+static gint          pending;
+
 static gint         *move;
 
 static gint          moves;
@@ -93,6 +97,10 @@ static gint          get_delta (gint             index,
 
 static void          layout    (gint             move,
                                 gfloat           angle);
+
+static void          ready     (ClutterTexture  *texture,
+                                gpointer         error,
+                                gpointer         data);
 
 static void          spin      (ClutterTimeline *timeline,
                                 gint             frame,
@@ -278,9 +286,26 @@ import (void)
     }
 
     for (j = 0; j < file->len && image[i] == NULL; j++)
-      image[i] = clutter_texture_new_from_file (file->pdata[(photo + j) % file->len], NULL);
+    {
+      ClutterTexture *t;
+      const gchar    *p = file->pdata[(photo + j) % file->len];
 
-    photo = image[i] != NULL ? (photo + j + 1) % file->len : 0;
+      image[i] = clutter_texture_new ();
+      t        = CLUTTER_TEXTURE (image[i]);
+
+      clutter_texture_set_load_data_async (t, TRUE);
+      g_signal_connect (image[i], "load-finished", G_CALLBACK (ready), NULL);
+
+      if (!clutter_texture_set_from_file (t, p, NULL))
+      {
+        clutter_actor_destroy (image[i]);
+        image[i] = NULL;
+        g_print ("hmm.. weird\n");
+      }
+    }
+
+    photo    = image[i] != NULL ? (photo + j + 1) % file->len : 0;
+    pending += image[i] != NULL;
 
     if (image[i] == NULL)
     {
@@ -299,6 +324,8 @@ import (void)
 
     clutter_container_add_actor (CLUTTER_CONTAINER (stage), image[i]);
   }
+
+  loaded = 0;
 }
 
 
@@ -615,6 +642,18 @@ layout (gint   face,
 
 
 static void
+ready (ClutterTexture *texture,
+       gpointer        error,
+       gpointer        data)
+{
+  loaded++;
+
+  g_print ("ready\n");
+}
+
+
+
+static void
 spin (ClutterTimeline *timeline,
       gint             frame,
       gpointer         data)
@@ -656,11 +695,25 @@ turn (ClutterTimeline *timeline,
 
     if (!moves)
     {
-      g_free  (move);
+      if (!pending)
+      {
+        g_free (move);
+        move = NULL;
+        import ();
+      }
 
-      import  ();
+      if (loaded < pending)
+      {
+        layout (0, 0);
+
+        return;
+      }
+
       arrange ();
       jumble  ();
+
+      loaded  = 0;
+      pending = 0;
     }
   }
 

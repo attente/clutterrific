@@ -68,13 +68,14 @@ def main (argv):
     if not paths:
       continue
 
-    pattern = '\s*[Mm]\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)'
+    pattern = '\s*[Mm]\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*,\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)'
     x0, y0 = re.match (pattern, paths[0].getAttribute ('d')).groups ()
+    x0, y0 = float (x0), float (y0)
     x1, y1 = 0, 0
 
     for path in paths:
       subgroup = svg.createElementNS ('svg', 'g')
-      subgroup.setAttribute ('id', '%s_' % path.getAttribute ('id'))
+      subgroup.setAttribute ('id', '%s__' % path.getAttribute ('id'))
       subgroup.setAttribute ('transform', group.getAttribute ('transform'))
 
       relative = False
@@ -82,7 +83,7 @@ def main (argv):
 
       i = 0
 
-      pattern = '([CMcm]?)\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)'
+      pattern = '([CMcm]?)\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*,\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)'
       commands = re.findall (pattern, path.getAttribute ('d'))
 
       for op, ox, oy in commands:
@@ -127,13 +128,21 @@ def main (argv):
     circle.setAttribute ('r', '1')
     group.parentNode.appendChild (circle)
 
+    name = '%s_1' % group.getAttribute ('id')
+
     anchor = svg.createElementNS ('svg', 'circle')
-    anchor.setAttribute ('id', '%s_1' % group.getAttribute ('id'))
+    anchor.setAttribute ('id', name)
     anchor.setAttribute ('transform', group.getAttribute ('transform'))
     anchor.setAttribute ('fill', 'orange')
     anchor.setAttribute ('r', '1')
-    anchor.setAttribute ('cx', str (x1))
-    anchor.setAttribute ('cy', str (y1))
+
+    if name in radii:
+      anchor.setAttribute ('cx', str (x0 + (radii[name])[0]))
+      anchor.setAttribute ('cy', str (y0 + (radii[name])[1]))
+    else:
+      anchor.setAttribute ('cx', str (x1))
+      anchor.setAttribute ('cy', str (y1))
+
     group.parentNode.appendChild (anchor)
 
   print svg.toprettyxml ()

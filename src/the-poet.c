@@ -20,9 +20,23 @@
 
 
 
-#define CAP    7
+#define CAP          7
 
-#define STEPS 64
+#define STEPS       64
+
+#define QUOTE(x)    #x
+
+#define EXPAND(x)   QUOTE(x)
+
+#define FONT        "the-poet.font"
+
+#define FONT_DATA_0 FONT
+
+#define FONT_DATA_1 "data/" FONT
+
+#define FONT_DATA_2 "../" FONT_DATA_1
+
+#define FONT_DATA_3 EXPAND(DATA_DIR) "/" FONT
 
 
 
@@ -460,51 +474,39 @@ glyph_paint (const Glyph *g,
 
 
 static const Glyph *
-glyph_lookup (GHashTable *font,
-              gchar       name,
-              gboolean    head,
-              gboolean    tail)
+glyph_lookup (GHashTable  *font,
+              const gchar *name,
+              gboolean     head,
+              gboolean     tail)
 {
   const Glyph *glyph = NULL;
-  gchar        key[4];
+  gchar       *key   = NULL;
 
   if (head && tail)
   {
-    key[0] = '_';
-    key[1] = name;
-    key[2] = '_';
-    key[3] = 0;
-
+    key   = g_strdup_printf ("_%s_", name);
     glyph = g_hash_table_lookup (font, key);
+
+    g_free (key);
   }
 
   if (glyph == NULL && head)
   {
-    key[0] = '_';
-    key[1] = name;
-    key[2] = 0;
-
+    key   = g_strdup_printf ("_%s", name);
     glyph = g_hash_table_lookup (font, key);
+
+    g_free (key);
   }
 
   if (glyph == NULL && tail)
   {
-    key[0] = name;
-    key[1] = '_';
-    key[2] = 0;
-
+    key   = g_strdup_printf ("%s_", name);
     glyph = g_hash_table_lookup (font, key);
+
+    g_free (key);
   }
 
-  if (glyph == NULL)
-  {
-    key[0] = name;
-    key[1] = 0;
-
-    glyph = g_hash_table_lookup (font, key);
-  }
-
-  return glyph;
+  return glyph == NULL ? g_hash_table_lookup (font, name) : glyph;
 }
 
 
@@ -516,20 +518,40 @@ text_paint (GHashTable  *font,
             gfloat       y,
             gfloat       t)
 {
-  gint i;
+  gchar name[2];
+  gint  i;
+
+  name[1] = 0;
 
   for (i = 0; t > 0 && text[i]; i++)
   {
+    const Glyph *glyph;
+
     gboolean head = !i           || g_ascii_isspace (text[i - 1]);
     gboolean tail = !text[i + 1] || g_ascii_isspace (text[i + 1]);
 
-    const Glyph *glyph = glyph_lookup (font, text[i], head, tail);
+    /* XXX */
+    if (text[i] == ' ')
+    {
+      cogl_translate (20, 0, 0);
+      x += 20;
+      continue;
+    }
+    if (text[i] == '\n')
+    {
+      cogl_translate (50-x, 60, 0);
+      x = 50;
+      continue;
+    }
+
+    name[0] = text[i];
+    glyph   = glyph_lookup (font, name, head, tail);
 
     if (glyph != NULL)
     {
-      cogl_translate (x, y, 0);
-
       glyph_paint (glyph, t);
+
+      cogl_translate (glyph->end.x, glyph->end.y, 0);
 
       x += glyph->end.x;
       y += glyph->end.y;
@@ -544,15 +566,21 @@ static gfloat
 text_size (GHashTable  *font,
            const gchar *text)
 {
+  gchar  name[2];
   gfloat x = 0;
   gint   i;
+
+  name[1] = 0;
 
   for (i = 0; text[i]; i++)
   {
     gboolean head = !i           || g_ascii_isspace (text[i - 1]);
     gboolean tail = !text[i + 1] || g_ascii_isspace (text[i + 1]);
 
-    const Glyph *glyph = glyph_lookup (font, text[i], head, tail);
+    const Glyph *glyph;
+
+    name[0] = text[i];
+    glyph   = glyph_lookup (font, name, head, tail);
 
     if (glyph != NULL)
       x += glyph->end.x;
@@ -566,33 +594,19 @@ text_size (GHashTable  *font,
 static void
 paint_XXX (void)
 {
-  Glyph *g = g_hash_table_lookup (font, "g2815");
+  static gfloat  t = -20.000;
+  static gfloat dt =  0.03125;
 
-  static gfloat  t = -10.000;
-  static gfloat dt =   0.125;
+  cogl_translate (50, 100, 0);
+  cogl_scale (1, 1, 1);
 
-  gfloat fade = 300;
+  cogl_set_source_color4f (0.0, 0.0, 0.0, 1.0);
 
-  cogl_translate (300, 200, 0);
-
-  if (t <= g->life + fade / 2 * dt)
-    cogl_set_source_color4f (0.0, 0.0, 0.0, 1.0);
-  else
-  {
-    gfloat alpha = (t - g->life - fade / 2 * dt) / (fade / 2 * dt);
-
-    cogl_set_source_color4f (alpha, alpha, alpha, 1.0);
-  }
-
-  glyph_paint (g, t);
+  /* text_paint (font, "dear gnome friends\n\ni love you guys\n\nsincerely\nwilliam hua", 50, 0, t); */
+  /* text_paint (font, "the quick brown fox\njumped over the lazy dog", 50, 0, t); */
+  text_paint (font, "hi everybody\n\nim still travelling at the\nmoment and if ive learned\nanything from this experience\nits that between travelling\ndistractions and a lack of decent", 50, 0, t);
 
   t += dt;
-
-  if (t > g->life + fade * dt)
-  {
-    t = -40 * 40 * dt * dt;
-    dt /= 2;
-  }
 }
 
 static gboolean
@@ -610,7 +624,17 @@ main (int   argc,
       char *argv[])
 {
   shift = 0;
-  font  = font_load ("the-poet.font");
+
+  if ((font = font_load (FONT_DATA_0)) == NULL)
+  if ((font = font_load (FONT_DATA_1)) == NULL)
+  if ((font = font_load (FONT_DATA_2)) == NULL)
+  if ((font = font_load (FONT_DATA_3)) == NULL)
+  if ((font = font_load ("/home/william/desktop/the-poet.font")) == NULL) /* XXX */
+  {
+    g_error ("No template font");
+
+    return 1;
+  }
 
   clutter_init      (&argc, &argv);
   clutterrific_init (&argc, &argv);
@@ -623,7 +647,7 @@ main (int   argc,
     clutter_actor_show_all (stage);
   }
 
-  g_timeout_add (10, redraw_XXX, NULL);
+  g_timeout_add          (10, redraw_XXX, NULL);
   g_signal_connect_after (stage, "paint", paint_XXX, NULL);
 
   clutter_main ();

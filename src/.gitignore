@@ -3,7 +3,6 @@
 .deps
 config.h
 config.h.in
-config.h.in~
 cube-twist
 flip-clock
 glow-clock

@@ -31,6 +31,8 @@
 
 #define GRID     15
 
+#define SPR      15
+
 #define HOUR      0.60
 #define MINUTE    0.80
 #define SECOND    0.90
@@ -77,6 +79,8 @@ static gint        rows;
 static gint        cols;
 
 static gfloat      grid;
+
+static gfloat      life;
 
 static light      *pixel;
 
@@ -872,10 +876,16 @@ paint_front (void)
 static void
 paint (void)
 {
+  gdouble dx = grid / 4 * cos (life / (SPR / (2 * M_PI)));
+  gdouble dy = grid / 4 * sin (life / (SPR / (2 * M_PI)));
   gdouble dt = clutterrific_delta ();
+
+  cogl_translate (dx, dy, 0);
 
   paint_back  ();
   paint_front ();
+
+  life += dt;
 
   {
     gint i, j;
@@ -928,6 +938,7 @@ main (int   argc,
   rows = ROWS;
   cols = COLS;
   grid = GRID;
+  life = 0;
 
   if (rows * grid > height)
     grid = (gfloat) height / rows;
