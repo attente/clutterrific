@@ -65,6 +65,8 @@ static gint          index[54];
 
 static ClutterActor *image[6];
 
+static ClutterActor *retire[6];
+
 static ClutterActor *cube;
 
 static ClutterActor *tile[54][3];
@@ -278,29 +280,26 @@ import (void)
 
   for (i = 0; i < 6; i++)
   {
-    if (image[i] != NULL)
-    {
-      clutter_actor_destroy (image[i]);
+    retire[i] = image[i];
 
-      image[i] = NULL;
-    }
-
-    for (j = 0; j < file->len && image[i] == NULL; j++)
+    for (j = 0; j < file->len; j++)
     {
-      ClutterTexture *t;
+      ClutterActor   *a = clutter_texture_new ();
+      ClutterTexture *t = CLUTTER_TEXTURE (a);
       const gchar    *p = file->pdata[(photo + j) % file->len];
 
-      image[i] = clutter_texture_new ();
-      t        = CLUTTER_TEXTURE (image[i]);
-
       clutter_texture_set_load_data_async (t, TRUE);
-      g_signal_connect (image[i], "load-finished", G_CALLBACK (ready), NULL);
+      g_signal_connect (a, "load-finished", G_CALLBACK (ready), NULL);
 
       if (!clutter_texture_set_from_file (t, p, NULL))
       {
-        clutter_actor_destroy (image[i]);
+        clutter_actor_destroy (a);
         image[i] = NULL;
-        g_print ("hmm.. weird\n");
+      }
+      else
+      {
+        image[i] = a;
+        break;
       }
     }
 
@@ -376,6 +375,9 @@ arrange (void)
     for (j = 0; j < 3; j++)
     for (k = 0; k < 3; k++)
       clutter_clone_set_source (CLUTTER_CLONE (tile[pack (i, j, k)][2]), image[i]);
+
+    for (i = 0; i < 6; i++)
+      clutter_actor_destroy (retire[i]);
   }
 }
 
@@ -477,10 +479,11 @@ rotate (gint              index,
         ClutterRotateAxis axis,
         gfloat            angle)
 {
-  clutter_actor_set_rotation (tile[index][level], axis, angle,
-                              45 - SPACE * (index % 3 - 1),
-                              45 - SPACE * (index / 3 % 3 - 1),
-                              -45 - 2 * SPACE);
+  if (tile[index][level] != NULL)
+    clutter_actor_set_rotation (tile[index][level], axis, angle,
+                                45 - SPACE * (index % 3 - 1),
+                                45 - SPACE * (index / 3 % 3 - 1),
+                                -45 - 2 * SPACE);
 }
 
 
@@ -647,8 +650,6 @@ ready (ClutterTexture *texture,
        gpointer        data)
 {
   loaded++;
-
-  g_print ("ready\n");
 }
 
 
@@ -664,15 +665,18 @@ spin (ClutterTimeline *timeline,
 
   angle += 0.1;
 
-  clutter_actor_set_rotation (cube, CLUTTER_X_AXIS,
-                              3 * angle + 30,
-                              size, size, size);
-  clutter_actor_set_rotation (cube, CLUTTER_Y_AXIS,
-                              2 * angle + 60,
-                              size, size, size);
-  clutter_actor_set_rotation (cube, CLUTTER_Z_AXIS,
-                              1 * angle + 90,
-                              size, size, size);
+  if (cube != NULL)
+  {
+    clutter_actor_set_rotation (cube, CLUTTER_X_AXIS,
+                                3 * angle + 30,
+                                size, size, size);
+    clutter_actor_set_rotation (cube, CLUTTER_Y_AXIS,
+                                2 * angle + 60,
+                                size, size, size);
+    clutter_actor_set_rotation (cube, CLUTTER_Z_AXIS,
+                                1 * angle + 90,
+                                size, size, size);
+  }
 }
 
 
@@ -688,7 +692,7 @@ turn (ClutterTimeline *timeline,
   gfloat angle    = 0;
   gfloat time;
 
-  if (progress < previous)
+  if (progress < previous || pending)
   {
     if (moves)
       untwist (move[--moves]);
@@ -699,6 +703,7 @@ turn (ClutterTimeline *timeline,
       {
         g_free (move);
         move = NULL;
+        moves = 0;
         import ();
       }
 
