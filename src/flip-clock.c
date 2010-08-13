@@ -689,7 +689,7 @@ int
 main (int   argc,
       char *argv[])
 {
-  ClutterColor     bg = { 255, 255, 255, 255 };
+  ClutterColor     bg = { 0, 0, 0, 255 };
   ClutterActor    *stage;
   ClutterTimeline *fade;
 

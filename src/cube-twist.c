@@ -313,12 +313,18 @@ import (void)
       clutter_color_from_hls (&colour, 60 * i, 0.6, 1.0);
 
       image[i] = clutter_rectangle_new_with_color (&colour);
+
+      clutter_actor_set_size (image[i], 90, 90);
     }
 
     if (image[i] != NULL)
     {
+      gfloat w, h;
+
+      clutter_actor_get_size     (image[i], &w, &h);
+      clutterrific_wrap          (&w, &h, 90, 90);
       clutter_actor_set_position (image[i], 2 * width, 2 * height);
-      clutter_actor_set_size     (image[i], 90, 90);
+      clutter_actor_set_size     (image[i], w, h);
     }
 
     clutter_container_add_actor (CLUTTER_CONTAINER (stage), image[i]);
@@ -339,22 +345,32 @@ arrange (void)
     cube = clutter_group_new ();
 
     for (i = 0; i < 6; i++)
-    for (j = 0; j < 3; j++)
-    for (k = 0; k < 3; k++)
     {
-      l = pack (i, j, k);
+      gfloat w, h;
 
-      tile[l][0] = clutter_group_new ();
-      tile[l][1] = clutter_group_new ();
-      tile[l][2] = clutter_clone_new (image[i]);
+      clutter_actor_get_size (image[i], &w, &h);
 
-      clutter_actor_set_position  (tile[l][0], (k + 1) * SPACE, (j + 1) * SPACE);
-      clutter_actor_set_depth     (tile[l][0], 90 + 4 * SPACE);
-      clutter_actor_set_size      (tile[l][2], 90, 90);
-      clutter_actor_set_clip      (tile[l][2], k * 30, j * 30, 30, 30);
-      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][1]), tile[l][2]);
-      clutter_container_add_actor (CLUTTER_CONTAINER (tile[l][0]), tile[l][1]);
-      clutter_container_add_actor (CLUTTER_CONTAINER (cube),       tile[l][0]);
+      for (j = 0; j < 3; j++)
+      for (k = 0; k < 3; k++)
+      {
+        gfloat x = (w - 90) / 2;
+        gfloat y = (h - 90) / 2;
+
+        l = pack (i, j, k);
+
+        tile[l][0] = clutter_group_new ();
+        tile[l][1] = clutter_group_new ();
+        tile[l][2] = clutter_clone_new (image[i]);
+
+        clutter_actor_set_position     (tile[l][0], (k + 1) * SPACE, (j + 1) * SPACE);
+        clutter_actor_set_depth        (tile[l][0], 90 + 4 * SPACE);
+        clutter_actor_set_anchor_point (tile[l][2], x, y);
+        clutter_actor_set_size         (tile[l][2], w, h);
+        clutter_actor_set_clip         (tile[l][2], x + k * 30, y + j * 30, 30, 30);
+        clutter_container_add_actor    (CLUTTER_CONTAINER (tile[l][1]), tile[l][2]);
+        clutter_container_add_actor    (CLUTTER_CONTAINER (tile[l][0]), tile[l][1]);
+        clutter_container_add_actor    (CLUTTER_CONTAINER (cube),       tile[l][0]);
+      }
     }
 
     {
