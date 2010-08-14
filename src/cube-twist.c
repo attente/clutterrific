@@ -29,8 +29,8 @@
 #define SPACE         0
 
 /* number of turns */
-#define MIN_TURNS    18
-#define MAX_TURNS    22
+#define MIN_TURNS    20
+#define MAX_TURNS    20
 
 /* non-turning moves */
 #define PRE_WAIT      1
@@ -51,10 +51,6 @@ static gfloat        width;
 
 static gfloat        height;
 
-static gint          loaded;
-
-static gint          pending;
-
 static gint         *move;
 
 static gint          moves;
@@ -64,8 +60,6 @@ static gint          pivot[6];
 static gint          index[54];
 
 static ClutterActor *image[6];
-
-static ClutterActor *retire[6];
 
 static ClutterActor *cube;
 
@@ -99,10 +93,6 @@ static gint          get_delta (gint             index,
 
 static void          layout    (gint             move,
                                 gfloat           angle);
-
-static void          ready     (ClutterTexture  *texture,
-                                gpointer         error,
-                                gpointer         data);
 
 static void          spin      (ClutterTimeline *timeline,
                                 gint             frame,
@@ -280,31 +270,20 @@ import (void)
 
   for (i = 0; i < 6; i++)
   {
-    retire[i] = image[i];
+    if (image[i] != NULL)
+      clutter_actor_destroy (image[i]);
 
-    for (j = 0; j < file->len; j++)
+    image[i] = NULL;
+
+    for (j = 0; image[i] == NULL && j < file->len; j++)
     {
-      ClutterActor   *a = clutter_texture_new ();
-      ClutterTexture *t = CLUTTER_TEXTURE (a);
-      const gchar    *p = file->pdata[(photo + j) % file->len];
+      const gchar *p = file->pdata[(photo + j) % file->len];
+      gfloat       s = SCALE * height / 480.0 * 90;
 
-      clutter_texture_set_load_data_async (t, TRUE);
-      g_signal_connect (a, "load-finished", G_CALLBACK (ready), NULL);
-
-      if (!clutter_texture_set_from_file (t, p, NULL))
-      {
-        clutter_actor_destroy (a);
-        image[i] = NULL;
-      }
-      else
-      {
-        image[i] = a;
-        break;
-      }
+      image[i] = clutterrific_image (p, s, s);
     }
 
-    photo    = image[i] != NULL ? (photo + j + 1) % file->len : 0;
-    pending += image[i] != NULL;
+    photo = image[i] != NULL ? (photo + j) % file->len : 0;
 
     if (image[i] == NULL)
     {
@@ -329,8 +308,6 @@ import (void)
 
     clutter_container_add_actor (CLUTTER_CONTAINER (stage), image[i]);
   }
-
-  loaded = 0;
 }
 
 
@@ -388,12 +365,25 @@ arrange (void)
   else
   {
     for (i = 0; i < 6; i++)
-    for (j = 0; j < 3; j++)
-    for (k = 0; k < 3; k++)
-      clutter_clone_set_source (CLUTTER_CLONE (tile[pack (i, j, k)][2]), image[i]);
+    {
+      gfloat x, y, w, h;
 
-    for (i = 0; i < 6; i++)
-      clutter_actor_destroy (retire[i]);
+      clutter_actor_get_size (image[i], &w, &h);
+
+      x = (w - 90) / 2.0;
+      y = (h - 90) / 2.0;
+
+      for (j = 0; j < 3; j++)
+      for (k = 0; k < 3; k++)
+      {
+        l = pack (i, j, k);
+
+        clutter_clone_set_source       (CLUTTER_CLONE (tile[l][2]), image[i]);
+        clutter_actor_set_anchor_point (tile[l][2], x, y);
+        clutter_actor_set_size         (tile[l][2], w, h);
+        clutter_actor_set_clip         (tile[l][2], x + k * 30, y + j * 30, 30, 30);
+      }
+    }
   }
 }
 
@@ -661,16 +651,6 @@ layout (gint   face,
 
 
 static void
-ready (ClutterTexture *texture,
-       gpointer        error,
-       gpointer        data)
-{
-  loaded++;
-}
-
-
-
-static void
 spin (ClutterTimeline *timeline,
       gint             frame,
       gpointer         data)
@@ -708,33 +688,18 @@ turn (ClutterTimeline *timeline,
   gfloat angle    = 0;
   gfloat time;
 
-  if (progress < previous || pending)
+  if (progress < previous)
   {
     if (moves)
       untwist (move[--moves]);
 
     if (!moves)
     {
-      if (!pending)
-      {
-        g_free (move);
-        move = NULL;
-        moves = 0;
-        import ();
-      }
+      g_free (move);
 
-      if (loaded < pending)
-      {
-        layout (0, 0);
-
-        return;
-      }
-
+      import  ();
       arrange ();
       jumble  ();
-
-      loaded  = 0;
-      pending = 0;
     }
   }
 
