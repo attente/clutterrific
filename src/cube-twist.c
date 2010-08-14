@@ -277,10 +277,10 @@ import (void)
 
     for (j = 0; image[i] == NULL && j < file->len; j++)
     {
-      const gchar *p = file->pdata[(photo + j) % file->len];
-      gfloat       s = SCALE * height / 480.0 * 90;
+      const gchar *path = file->pdata[(photo + j) % file->len];
+      gfloat       size = SCALE * height / 480.0 * 90;
 
-      image[i] = clutterrific_image (p, s, s);
+      image[i] = clutterrific_image (path, size, size);
     }
 
     photo = image[i] != NULL ? (photo + j) % file->len : 0;

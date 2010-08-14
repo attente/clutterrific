@@ -213,7 +213,9 @@ create_photo (Photo *photo)
 
     for (i = 0; image == NULL && i < file->len; i++)
     {
-      image = clutter_texture_new_from_file (file->pdata[next++], NULL);
+      gfloat size = SPACE * MIN (W, H);
+
+      image = clutterrific_image (file->pdata[next++], size, size);
 
       if (next >= file->len)
         next = 0;
