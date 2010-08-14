@@ -50,6 +50,8 @@
 
 #define SWIPE_STYLE_SCALE_UP       1.0
 
+#define SWIPE_STYLE_RESOLUTION     0.5
+
 #define SWIPE_STYLE_MIN_SIZE       0.2
 
 #define SWIPE_STYLE_MAX_SIZE       0.4
@@ -630,7 +632,7 @@ swipe_style_create_memory (gint             wait,
 
       for (i = 0; i < path->len && memory->swatch.actor == NULL; i++)
       {
-        memory->swatch.actor = clutter_texture_new_from_file (path->pdata[file++], NULL);
+        memory->swatch.actor = clutterrific_image (path->pdata[file++], width * SWIPE_STYLE_RESOLUTION, height * SWIPE_STYLE_RESOLUTION);
 
         if (file >= path->len)
           file = 0;
