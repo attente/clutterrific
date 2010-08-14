@@ -22,8 +22,12 @@
 
 #include <errno.h>
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
+
 #include <clutter/clutter.h>
 #include <clutter/x11/clutter-x11.h>
+
+#include "clutterrific.h"
 
 
 
@@ -164,6 +168,51 @@ clutterrific_shuffle (GPtrArray *array)
       }
     }
   }
+}
+
+
+
+ClutterActor *
+clutterrific_image (const gchar *path,
+                    gfloat       w,
+                    gfloat       h)
+{
+  ClutterActor   *actor;
+  ClutterTexture *image;
+  GdkPixbuf      *pixbuf;
+  gint            w0, h0;
+  gfloat          scale;
+
+  gdk_pixbuf_get_file_info (path, &w0, &h0);
+
+  scale = MAX (w / w0, h / h0);
+
+  if (scale < 1)
+  {
+    w0 = scale * w0 + 0.5;
+    h0 = scale * h0 + 0.5;
+  }
+
+  pixbuf = gdk_pixbuf_new_from_file_at_size (path, w0, h0, NULL);
+
+  actor = clutter_texture_new ();
+  image = CLUTTER_TEXTURE (actor);
+
+  if (!clutter_texture_set_from_rgb_data (image,
+                                          gdk_pixbuf_get_pixels     (pixbuf),
+                                          gdk_pixbuf_get_has_alpha  (pixbuf),
+                                          gdk_pixbuf_get_width      (pixbuf),
+                                          gdk_pixbuf_get_height     (pixbuf),
+                                          gdk_pixbuf_get_rowstride  (pixbuf),
+                                          gdk_pixbuf_get_n_channels (pixbuf),
+                                          0,
+                                          NULL))
+  {
+    clutter_actor_destroy (actor);
+    actor = NULL;
+  }
+
+  return actor;
 }
 
 

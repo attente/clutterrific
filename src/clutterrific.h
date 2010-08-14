@@ -25,33 +25,37 @@
 
 
 
-#include <glib.h>
+#include <clutter/clutter.h>
 
 
 
-void        clutterrific_init    (int           *argc,
-                                  char        ***argv);
+void           clutterrific_init    (int           *argc,
+                                     char        ***argv);
 
-gfloat      clutterrific_width   (void);
+gfloat         clutterrific_width   (void);
 
-gfloat      clutterrific_height  (void);
+gfloat         clutterrific_height  (void);
 
-void        clutterrific_pack    (gfloat        *w,
-                                  gfloat        *h,
-                                  gfloat         w0,
-                                  gfloat         h0);
+void           clutterrific_pack    (gfloat        *w,
+                                     gfloat        *h,
+                                     gfloat         w0,
+                                     gfloat         h0);
 
-void        clutterrific_wrap    (gfloat        *w,
-                                  gfloat        *h,
-                                  gfloat         w0,
-                                  gfloat         h0);
+void           clutterrific_wrap    (gfloat        *w,
+                                     gfloat        *h,
+                                     gfloat         w0,
+                                     gfloat         h0);
 
-gdouble     clutterrific_delta   (void);
+gdouble        clutterrific_delta   (void);
 
-GPtrArray * clutterrific_list    (const gchar   *path,
-                                  const gchar   *pattern);
+GPtrArray *    clutterrific_list    (const gchar   *path,
+                                     const gchar   *pattern);
 
-void        clutterrific_shuffle (GPtrArray     *array);
+void           clutterrific_shuffle (GPtrArray     *array);
+
+ClutterActor * clutterrific_image   (const gchar   *path,
+                                     gfloat         w,
+                                     gfloat         h);
 
 
 
