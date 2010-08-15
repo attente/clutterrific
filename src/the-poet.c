@@ -629,7 +629,6 @@ main (int   argc,
   if ((font = font_load (FONT_DATA_1)) == NULL)
   if ((font = font_load (FONT_DATA_2)) == NULL)
   if ((font = font_load (FONT_DATA_3)) == NULL)
-  if ((font = font_load ("/home/william/desktop/the-poet.font")) == NULL) /* XXX */
   {
     g_error ("No template font");
 
