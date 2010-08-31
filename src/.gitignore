@@ -6,6 +6,7 @@ config.h.in
 cube-twist
 flip-clock
 glow-clock
+Makefile
 Makefile.in
 memorrific
 photofall
